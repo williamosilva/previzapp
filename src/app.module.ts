@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { WeatherMessagesModule } from './modules/WeatherMessages/weathermessages.module';
+import { OpenWeatherModule } from './modules/OpenWeather/openweather.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    OpenWeatherModule,
+    WeatherMessagesModule,
+  ],
 })
 export class AppModule {}
