@@ -35,6 +35,12 @@ export class GeolocationService {
         address: addressName,
       };
     } catch (error) {
+      // Se o erro já for uma HttpException, não a modifique
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      // Caso contrário, crie uma nova HttpException
       throw new HttpException(
         `Error fetching coordinates: ${error.message}`,
         HttpStatus.BAD_REQUEST,

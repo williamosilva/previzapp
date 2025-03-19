@@ -2,4 +2,4 @@
 
 export * from './weatherRecommendations';
 export * from './weatherClassifications';
-export * from './AlertSeverity';
+export * from './alerts';
