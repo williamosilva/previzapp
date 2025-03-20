@@ -395,8 +395,12 @@ GET api/weather/summary?address=Serra%20Negra&lang=pt
           "end": "2025-03-20 13:00",
           "durationHours": 25
         },
-        "description": "INMET publica aviso iniciando em: 19/03/2025 09:05. Chuva entre 30 e 60 mm/h ou 50 e 100 mm/dia, ventos intensos (60-100 km/h). Risco de corte de energia elétrica, queda de galhos de árvores, alagamentos e de descargas elétricas.",
-        "categories": ["Chuva"],
+        "description": "INMET publica aviso iniciando em: 19/03/2025 09:05.
+        Chuva entre 30 e 60 mm/h ou 50 e 100 mm/dia, ventos intensos (60-100 km/h).
+        Risco de corte de energia elétrica, queda de galhos de árvores, alagamentos e de descargas elétricas.",
+        "categories": [
+          "Chuva"
+        ],
         "severity": "Baixa"
       }
     ]
@@ -414,7 +418,12 @@ GET api/weather/summary?address=Serra%20Negra&lang=pt
     "windSpeed": "Fraco",
     "uvIndex": "Baixo"
   },
-  "summary": "Atualmente, o clima está bastante ameno com uma temperatura de 290K e uma velocidade do vento leve de 5 metros por segundo vindo do sudeste. O céu está parcialmente nublado com nuvens dispersas, e a visibilidade é boa em 10000 metros. A pressão do ar está em 1017 hPa, e a umidade é bastante alta em 92%. O ponto de orvalho também está em 289K, tornando o ar bastante úmido. O índice UV é baixo em 0, então não há necessidade de se preocupar com proteção solar no momento. No geral, é uma noite relativamente calma e nublada com temperaturas confortáveis. Lembre-se de se vestir adequadamente e aproveitar o clima agradável!"
+  "summary": "Atualmente, o clima está bastante ameno com uma temperatura de 290K e uma velocidade do vento leve
+  de 5 metros por segundo vindo do sudeste. O céu está parcialmente nublado com nuvens dispersas, e a visibilidade
+  é boa em 10000 metros. A pressão do ar está em 1017 hPa, e a umidade é bastante alta em 92%. O ponto de orvalho
+  também está em 289K, tornando o ar bastante úmido. O índice UV é baixo em 0, então não há necessidade de se
+  preocupar com proteção solar no momento. No geral, é uma noite relativamente calma e nublada com
+  temperaturas confortáveis. Lembre-se de se vestir adequadamente e aproveitar o clima agradável!"
 }
 ```
 
