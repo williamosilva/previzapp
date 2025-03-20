@@ -5,7 +5,7 @@ import {
   generateClassifications,
   generateWeatherRecommendations,
   getWindDirection,
-} from 'src/utils/index';
+} from '../../../utils/index';
 import {
   ProcessedWeatherOverview,
   ProcessedOneCallData,
