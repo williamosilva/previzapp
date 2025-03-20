@@ -1,10 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WeatherProcessorService } from '../processor/weather-processor.service';
 import { WeatherFormatterService } from '../formatter/weather-formatter.service';
-import {
-  ProcessedOneCallData,
-  ProcessedWeatherOverview,
-} from '../../../types/open-weather';
+import { ProcessedOneCallData, ProcessedWeatherOverview } from '../types';
 
 jest.mock('../../../utils/index', () => ({
   determineAlertSeverity: () => 'High',

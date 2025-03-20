@@ -12,7 +12,7 @@ import {
   WeatherResponse,
   ProcessedWeatherOverview,
   ProcessedOneCallData,
-} from '../../../types/open-weather';
+} from '../types';
 import { HttpException } from '@nestjs/common';
 
 describe('WeatherMessages', () => {
