@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { OpenWeatherService } from './openweather.service';
-import { OpenWeatherErrorHandler } from './errors/openweather.error-handler';
-import { OpenWeatherConfigService } from './config/openweather.config';
-import { OpenWeatherValidator } from './validators/openweather.validator';
+import { OpenWeatherService } from './open-weather.service';
+import { OpenWeatherErrorHandler } from './errors/open-weather.error-handler';
+import { OpenWeatherConfigService } from './config/open-weather.config';
+import { OpenWeatherValidator } from './validators/open-weather.validator';
 
 @Module({
   imports: [

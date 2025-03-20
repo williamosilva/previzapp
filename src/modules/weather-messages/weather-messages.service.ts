@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OpenWeatherService } from '../open-weather/openweather.service';
-import { TranslationService } from '../translation-module/translation.service';
+import { OpenWeatherService } from '../open-weather/open-weather.service';
+import { TranslationService } from '../translation/translation.service';
 import { GeolocationService } from '../geolocation/geolocation.service';
 import { WeatherProcessorService } from './processor/weather-processor.service';
 

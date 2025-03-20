@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { WeatherMessagesController } from '../weathermessages.controller';
-import { WeatherMessageService } from '../weathermessages.service';
-import { OpenWeatherService } from '../../open-weather/openweather.service';
-import { TranslationService } from '../../translation-module/translation.service';
+import { WeatherMessagesController } from '../weather-messages.controller';
+import { WeatherMessageService } from '../weather-messages.service';
+import { OpenWeatherService } from '../../open-weather/open-weather.service';
+import { TranslationService } from '../../translation/translation.service';
 import { GeolocationService } from '../../geolocation/geolocation.service';
 import { WeatherProcessorService } from '../processor/weather-processor.service';
 import { of } from 'rxjs';

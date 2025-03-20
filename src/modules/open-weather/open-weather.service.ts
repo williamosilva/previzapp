@@ -9,9 +9,9 @@ import {
 } from '../../types/open-weather';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { OpenWeatherConfigService } from './config/openweather.config';
-import { OpenWeatherErrorHandler } from './errors/openweather.error-handler';
-import { OpenWeatherValidator } from './validators/openweather.validator';
+import { OpenWeatherConfigService } from './config/open-weather.config';
+import { OpenWeatherErrorHandler } from './errors/open-weather.error-handler';
+import { OpenWeatherValidator } from './validators/open-weather.validator';
 
 // O service resumidante suporta duas funções principais: getWeatherOverview e getOneCallData
 // Ambas funções são responsáveis por fazer a requisição para a API do OpenWeather e processar a resposta (Dois endpoints diferentes)
