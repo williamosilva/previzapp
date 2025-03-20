@@ -6,7 +6,7 @@ import {
   ProcessedWeatherOverview,
   OpenWeatherOneCallResponse,
   ProcessedOneCallData,
-} from '../../types/OpenWeather';
+} from '../../types/open-weather';
 import { catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { OpenWeatherConfigService } from './config/openweather.config';

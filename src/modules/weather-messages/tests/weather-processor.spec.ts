@@ -4,7 +4,7 @@ import { WeatherFormatterService } from '../formatter/weather-formatter.service'
 import {
   ProcessedOneCallData,
   ProcessedWeatherOverview,
-} from '../../../types/OpenWeather';
+} from '../../../types/open-weather';
 
 jest.mock('../../../utils/index', () => ({
   determineAlertSeverity: () => 'High',

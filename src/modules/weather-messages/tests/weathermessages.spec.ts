@@ -3,16 +3,16 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { WeatherMessagesController } from '../weathermessages.controller';
 import { WeatherMessageService } from '../weathermessages.service';
-import { OpenWeatherService } from '../../OpenWeather/openweather.service';
-import { TranslationService } from '../../TranslationModule/translation.service';
-import { GeolocationService } from '../../Geolocation/geolocation.service';
+import { OpenWeatherService } from '../../open-weather/openweather.service';
+import { TranslationService } from '../../translation-module/translation.service';
+import { GeolocationService } from '../../Geolocation-x/geolocation.service';
 import { WeatherProcessorService } from '../processor/weather-processor.service';
 import { of } from 'rxjs';
 import {
   WeatherResponse,
   ProcessedWeatherOverview,
   ProcessedOneCallData,
-} from '../../../types/OpenWeather';
+} from '../../../types/open-weather';
 import { HttpException } from '@nestjs/common';
 
 describe('WeatherMessages', () => {

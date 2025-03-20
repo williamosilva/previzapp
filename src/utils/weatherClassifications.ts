@@ -1,4 +1,4 @@
-import { ProcessedOneCallData } from 'src/types/OpenWeather';
+import { ProcessedOneCallData } from 'src/types/open-weather';
 
 export function generateClassifications(oneCallData: ProcessedOneCallData) {
   // Exemplo de classificações baseadas nos dados combinados

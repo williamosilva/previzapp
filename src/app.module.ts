@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { WeatherMessagesModule } from './modules/WeatherMessages/weathermessages.module';
-import { OpenWeatherModule } from './modules/OpenWeather/openweather.module';
+import { WeatherMessagesModule } from './modules/weather-messages/weathermessages.module';
+import { OpenWeatherModule } from './modules/open-weather/openweather.module';
 
 @Module({
   imports: [
