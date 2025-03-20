@@ -1,10 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { AxiosError } from 'axios';
 import { Observable, throwError } from 'rxjs';
-import {
-  OpenWeatherError,
-  OpenWeatherErrorCode,
-} from '../../../types/open-weather';
+import { OpenWeatherError, OpenWeatherErrorCode } from '../types';
 
 @Injectable()
 export class OpenWeatherErrorHandler {

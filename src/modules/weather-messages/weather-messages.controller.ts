@@ -23,7 +23,7 @@ export class WeatherMessagesController {
     try {
       if (!addressStr) {
         throw new HttpException(
-          'Address parameter is required',
+          `Address parameter is required`,
           HttpStatus.BAD_REQUEST,
         );
       }

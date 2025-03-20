@@ -5,7 +5,7 @@ import { GeolocationService } from '../geolocation/geolocation.service';
 import { WeatherProcessorService } from './processor/weather-processor.service';
 
 import { firstValueFrom } from 'rxjs';
-import { WeatherResponse } from '../../types/open-weather';
+import { WeatherResponse } from './types';
 
 @Injectable()
 export class WeatherMessageService {

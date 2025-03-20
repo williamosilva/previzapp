@@ -1,4 +1,4 @@
-import { ProcessedOneCallData } from 'src/types/open-weather';
+import { ProcessedOneCallData } from '../modules/weather-messages/types';
 
 // Gera recomendações personalizadas baseadas em dados meteorológicos.
 // As recomendações são armazenadas em um conjunto para evitar duplicatas.
