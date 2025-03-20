@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OpenWeatherService } from '../open-weather/openweather.service';
 import { TranslationService } from '../translation-module/translation.service';
-import { GeolocationService } from '../Geolocation-x/geolocation.service';
+import { GeolocationService } from '../geolocation/geolocation.service';
 import { WeatherProcessorService } from './processor/weather-processor.service';
 
 import { firstValueFrom } from 'rxjs';
