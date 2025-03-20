@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { WeatherMessageService } from './weathermessages.service';
-import { OpenWeatherErrorCode } from 'src/types/OpenWeather';
+// import { OpenWeatherErrorCode } from 'src/types/OpenWeather';
 
 @Controller('weather')
 export class WeatherMessagesController {

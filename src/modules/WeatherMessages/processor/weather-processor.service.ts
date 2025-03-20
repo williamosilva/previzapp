@@ -10,7 +10,7 @@ import {
   ProcessedWeatherOverview,
   ProcessedOneCallData,
   WeatherResponse,
-} from 'src/types/OpenWeather';
+} from '../../../types/OpenWeather';
 
 @Injectable()
 export class WeatherProcessorService {

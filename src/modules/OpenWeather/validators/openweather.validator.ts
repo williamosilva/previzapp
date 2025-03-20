@@ -3,7 +3,7 @@ import {
   OpenWeatherParams,
   OpenWeatherError,
   OpenWeatherErrorCode,
-} from 'src/types/OpenWeather';
+} from '../../../types/OpenWeather';
 
 @Injectable()
 export class OpenWeatherValidator {
