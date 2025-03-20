@@ -5,10 +5,4 @@ export interface WeatherCondition {
   icon: string;
 }
 
-export interface Location {
-  latitude: number;
-  longitude: number;
-  timezone: string;
-}
-
 export type Units = 'standard' | 'metric' | 'imperial';
