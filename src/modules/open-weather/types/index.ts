@@ -1,5 +1,4 @@
 export * from './params';
+export * from './errors';
 export * from './responses';
 export * from './processed';
-export * from './errors';
-export * from './weather-response';

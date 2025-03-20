@@ -1,4 +1,4 @@
-import { ProcessedOneCallData } from 'src/types/open-weather';
+import { ProcessedOneCallData } from '../modules/weather-messages/types';
 
 export function generateClassifications(oneCallData: ProcessedOneCallData) {
   // Exemplo de classificações baseadas nos dados combinados
@@ -13,7 +13,6 @@ export function generateClassifications(oneCallData: ProcessedOneCallData) {
 }
 
 // Métodos auxiliares para classificação abaixo
-
 function classifyTemperature(temp?: number): string {
   if (temp === undefined) return 'Unknown';
 
