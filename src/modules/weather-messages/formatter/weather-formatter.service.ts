@@ -23,8 +23,11 @@ export class WeatherFormatterService {
     sunrise: number,
     sunset: number,
   ): { formattedSunrise: string; formattedSunset: string } {
-    const sunriseTime = new Date(sunrise * 1000);
-    const sunsetTime = new Date(sunset * 1000);
+    // Offset de 3 horas para o fuso horário de São Paulo
+    const timezoneOffset = 3 * 60 * 60 * 1000;
+
+    const sunriseTime = new Date(sunrise * 1000 - timezoneOffset);
+    const sunsetTime = new Date(sunset * 1000 - timezoneOffset);
 
     const formattedSunrise = sunriseTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
