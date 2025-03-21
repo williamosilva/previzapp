@@ -329,7 +329,7 @@ Retorna um resumo completo das condições climáticas para o local especificado
 #### Exemplo de Requisição
 
 ```
-GET api/weather/summary?address=Serra%20Negra&lang=pt
+GET api/weather/summary?address=Serra%20Negra&lang=pt-br
 ```
 
 #### Exemplo de Resposta
