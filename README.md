@@ -2,7 +2,7 @@
 
 ## Sobre o Projeto
 
-Este serviço transforma dados brutos de clima da API OpenWeather em um formato mais intuitivo e amigável para o usuário. Ele enriquece os dados com insights adicionais, como classificações climáticas, recomendações baseadas nas condições atuais, resumos do clima traduzidos e oferece suporta a todas os idiomas existentes.
+Este serviço transforma dados brutos de clima da API OpenWeather em um formato mais intuitivo e amigável para o usuário. Ele enriquece os dados com insights adicionais, como classificações climáticas, recomendações baseadas nas condições atuais, resumos do clima traduzidos e oferece suporte a todas os idiomas existentes.
 
 ### Principais Recursos
 
