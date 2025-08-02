@@ -15,5 +15,6 @@ import { WeatherProcessorService } from './processor/weather-processor.service';
     WeatherFormatterService,
     WeatherProcessorService,
   ],
+  exports: [WeatherMessageService],
 })
 export class WeatherMessagesModule {}

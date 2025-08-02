@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { WeatherMessagesModule } from './modules/weather-messages/weather-messages.module';
 import { OpenWeatherModule } from './modules/open-weather/open-weather.module';
+import { TelegramModule } from './modules/telegram/telegram.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { OpenWeatherModule } from './modules/open-weather/open-weather.module';
     }),
     OpenWeatherModule,
     WeatherMessagesModule,
+    TelegramModule,
   ],
 })
 export class AppModule {}
