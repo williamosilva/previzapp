@@ -44,6 +44,11 @@ export class WeatherMessageService {
       ),
     ]);
 
+    // console.log(
+    //   `Dados obtidos para ${addressName}:`,
+    //   JSON.stringify({ oneCallData }, null, 2),
+    // );
+
     const combinedData = this.weatherProcessor.processWeatherData(
       overviewData,
       oneCallData,

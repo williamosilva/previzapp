@@ -22,6 +22,9 @@ export class WeatherProcessorService {
     addressName: string = '',
   ): WeatherResponse {
     const processedCurrentData = this.processCurrentData(oneCallData);
+    // console.log('onecallData:', oneCallData);
+    // console.log('processedCurrentData:', processedCurrentData);
+
     const processedAlerts = this.processAlerts(oneCallData.alerts);
 
     // Combina todos os dados para o formato final de saída
@@ -51,6 +54,7 @@ export class WeatherProcessorService {
 
   private processCurrentData(oneCallData: ProcessedOneCallData) {
     // Processar data e hora
+    console.log('Processing current data:', oneCallData);
     const { formattedDate, formattedTime } =
       this.weatherFormatter.formatDateTime(oneCallData.current.dt);
 

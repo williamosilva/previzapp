@@ -6,12 +6,15 @@ export class WeatherFormatterService {
     formattedDate: string;
     formattedTime: string;
   } {
-    const dateTime = new Date(timestamp * 1000);
+    // Aplicar offset de São Paulo (UTC-3)
+    const timezoneOffset = -3 * 60 * 60 * 1000; // -3 horas em millisegundos
+    const dateTime = new Date(timestamp * 1000 + timezoneOffset);
 
     const formattedTime = dateTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
+      timeZone: 'UTC', // Usar UTC pois já aplicamos o offset manualmente
     });
 
     const formattedDate = dateTime.toISOString().split('T')[0];
@@ -23,22 +26,23 @@ export class WeatherFormatterService {
     sunrise: number,
     sunset: number,
   ): { formattedSunrise: string; formattedSunset: string } {
-    // Offset de 3 horas para o fuso horário de São Paulo
-    const timezoneOffset = 3 * 60 * 60 * 1000;
+    const timezoneOffset = -3 * 60 * 60 * 1000;
 
-    const sunriseTime = new Date(sunrise * 1000 - timezoneOffset);
-    const sunsetTime = new Date(sunset * 1000 - timezoneOffset);
+    const sunriseTime = new Date(sunrise * 1000 + timezoneOffset);
+    const sunsetTime = new Date(sunset * 1000 + timezoneOffset);
 
     const formattedSunrise = sunriseTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
+      timeZone: 'UTC',
     });
 
     const formattedSunset = sunsetTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
+      timeZone: 'UTC',
     });
 
     return { formattedSunrise, formattedSunset };
@@ -48,8 +52,10 @@ export class WeatherFormatterService {
     start: number,
     end: number,
   ): { formattedStartTime: string; formattedEndTime: string } {
-    const startTime = new Date(start * 1000);
-    const endTime = new Date(end * 1000);
+    const timezoneOffset = -3 * 60 * 60 * 1000;
+
+    const startTime = new Date(start * 1000 + timezoneOffset);
+    const endTime = new Date(end * 1000 + timezoneOffset);
 
     const formattedStartTime = `${startTime.toISOString().split('T')[0]} ${startTime.toLocaleTimeString(
       'en-US',
@@ -57,6 +63,7 @@ export class WeatherFormatterService {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
+        timeZone: 'UTC',
       },
     )}`;
 
@@ -66,6 +73,7 @@ export class WeatherFormatterService {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
+        timeZone: 'UTC',
       },
     )}`;
 
@@ -76,7 +84,6 @@ export class WeatherFormatterService {
     temp: number,
     feelsLike: number,
   ): { tempCelsius: number; feelsLikeCelsius: number } {
-    // Conversor kelvin -> celsius
     const tempCelsius = temp - 273.15;
     const feelsLikeCelsius = feelsLike - 273.15;
 

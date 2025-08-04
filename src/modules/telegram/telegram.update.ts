@@ -84,13 +84,14 @@ Digite /help para mais informações.
 
       const weatherData = await this.weatherMessageService.getWeatherSummary(
         userText,
-        'pt',
+        'en',
       );
 
       const formattedMessage = this.formatWeatherResponse(weatherData);
-      console.log('Mensagem formatada:', formattedMessage);
-
-      await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
+      await this.telegramService.sendMessageWithMarkdown(
+        chatId,
+        formattedMessage,
+      );
     } catch (error) {
       this.logger.error(`Erro ao processar clima para ${userText}:`, error);
 
@@ -116,67 +117,138 @@ Digite /help para mais informações.
   }
 
   private formatWeatherResponse(weatherData: any): string {
-    console.log('Dados completos:', weatherData);
+    const escapeMarkdown = (text: string) => {
+      if (!text) return '';
+      return text.replace(/([\_*\[\]\(\)~\`>\#\+\-=\|\{\}\.!])/g, '\\$1');
+    };
 
-    const location = weatherData.location?.address || 'Local não especificado';
+    const location = escapeMarkdown(
+      weatherData.location?.address || 'Local não especificado',
+    );
     const currentData = weatherData.currentData || {};
+    const dateTime = weatherData.dateTime || {};
 
-    const description = currentData.weather?.description || 'Sem descrição';
-    const temperature = currentData.temperature?.celsius
-      ? Math.round(currentData.temperature.celsius)
+    // Dados principais com tratamento para valores indefinidos
+    const tempCelsius =
+      currentData.temperature?.celsius !== undefined
+        ? Math.round(currentData.temperature.celsius)
+        : 'N/A';
+
+    const feelsLike =
+      currentData.temperature?.feelsLike?.celsius !== undefined
+        ? Math.round(currentData.temperature.feelsLike.celsius)
+        : 'N/A';
+
+    const humidity =
+      currentData.atmosphere?.humidity !== undefined
+        ? currentData.atmosphere.humidity
+        : 'N/A';
+
+    const windSpeed =
+      currentData.wind?.speed !== undefined
+        ? Math.round(currentData.wind.speed * 3.6)
+        : 'N/A';
+
+    const windDirection = currentData.wind?.direction
+      ? escapeMarkdown(currentData.wind.direction)
       : 'N/A';
-    const feelsLike = currentData.temperature?.feelsLike?.celsius
-      ? Math.round(currentData.temperature.feelsLike.celsius)
+
+    const uvIndex =
+      currentData.atmosphere?.uvIndex !== undefined
+        ? Math.round(currentData.atmosphere.uvIndex)
+        : 'N/A';
+
+    const clouds =
+      currentData.atmosphere?.clouds !== undefined
+        ? currentData.atmosphere.clouds
+        : 'N/A';
+
+    const pressure =
+      currentData.atmosphere?.pressure !== undefined
+        ? currentData.atmosphere.pressure
+        : 'N/A';
+
+    const sunrise = currentData.sun?.sunrise
+      ? escapeMarkdown(currentData.sun.sunrise)
       : 'N/A';
-    const humidity = currentData.atmosphere?.humidity || 'N/A';
-    const windSpeed = currentData.wind?.speed
-      ? Math.round(currentData.wind.speed * 3.6)
+
+    const sunset = currentData.sun?.sunset
+      ? escapeMarkdown(currentData.sun.sunset)
       : 'N/A';
-    const windDirection = currentData.wind?.direction || '';
 
-    const pressure = currentData.atmosphere?.pressure || 'N/A';
-    const uvIndex = currentData.atmosphere?.uvIndex
-      ? Math.round(currentData.atmosphere.uvIndex)
-      : 'N/A';
-    const clouds = currentData.atmosphere?.clouds || 'N/A';
+    const description = currentData.weather?.description
+      ? escapeMarkdown(currentData.weather.description)
+      : 'Sem descrição';
 
-    const sunrise = currentData.sun?.sunrise || 'N/A';
-    const sunset = currentData.sun?.sunset || 'N/A';
+    // Classificações humanizadas
+    const classifications = weatherData.classifications || {};
+    const tempClass = classifications.temperature || 'N/A';
+    const humidityClass = classifications.humidity || 'N/A';
+    const windClass = classifications.windSpeed || 'N/A';
+    const uvClass = classifications.uvIndex || 'N/A';
 
-    let message = `🌍 *${location}*\n\n`;
-    message += `🌡️ **Temperatura:** ${temperature}°C\n`;
-    message += `🤔 **Sensação térmica:** ${feelsLike}°C\n`;
-    message += `🌤️ **Condição:** ${description}\n`;
-    message += `💧 **Umidade:** ${humidity}%\n`;
+    // Construção da mensagem estilo assistente
+    let message = `🌤️ *PREVISÃO PARA\\: ${location}*\n`;
+    message += `📅 ${escapeMarkdown(dateTime.date)} \\| ⏰ ${escapeMarkdown(dateTime.time)}\n\n`;
 
-    if (windSpeed !== 'N/A') {
-      message += `💨 **Vento:** ${windSpeed} km/h`;
-      if (windDirection) {
-        message += ` (${windDirection})`;
-      }
-      message += `\n`;
+    // Resumo principal (destaque) - CORREÇÃO: Removido o bloco duplicado
+    if (weatherData.summary) {
+      const safeSummary = weatherData.summary
+        .replace(/(\d+)-(\d+)/g, '$1\\-$2') // Escapar hífens entre números
+        .replace(/-/g, '\\-') // Escapar outros hífens
+        .replace(/:/g, '\\:'); // Escapar dois pontos
+
+      message += `💬 *RESUMO DO DIA*\n${escapeMarkdown(safeSummary)}\n\n`;
     }
 
-    message += `🌅 **Nascer do sol:** ${sunrise}\n`;
-    message += `🌇 **Pôr do sol:** ${sunset}\n`;
-    message += `☁️ **Nebulosidade:** ${clouds}%\n`;
-    message += `🌡️ **Pressão:** ${pressure} hPa\n`;
-    message += `☀️ **Índice UV:** ${uvIndex}\n`;
+    // Bloco de condições atuais
+    message += `📊 *CONDIÇÕES ATUAIS*\n`;
+    message += `🌡️ Temperatura\\: ${tempCelsius}°C \\(Sensação ${feelsLike}°C\\)\n`;
+    message += `🌤️ Condição\\: ${description}\n`;
+    message += `💧 Umidade\\: ${humidity}% \\| 💨 Vento\\: ${windSpeed} km/h \\(${windDirection}\\)\n`;
+    message += `☀️ UV\\: ${uvIndex} \\| ☁️ Nebulosidade\\: ${clouds}%\n\n`;
 
-    if (weatherData.recommendations && weatherData.recommendations.length > 0) {
-      message += `\n💡 **Recomendações:**\n`;
-      weatherData.recommendations
-        .slice(0, 3)
-        .forEach((rec: string, index: number) => {
-          message += `${index + 1}. ${rec}\n`;
-        });
+    // Classificações intuitivas
+    message += `🏷️ *CLASSIFICAÇÕES*\n`;
+    message += `• Temperatura\\: ${escapeMarkdown(tempClass)}\n`;
+    message += `• Umidade\\: ${escapeMarkdown(humidityClass)}\n`;
+    message += `• Vento\\: ${escapeMarkdown(windClass)}\n`;
+    message += `• Índice UV\\: ${escapeMarkdown(uvClass)}\n\n`;
+
+    // Astro informações
+    message += `🌞 *SOL*\n`;
+    message += `Nascer\\: ${sunrise} \\| Pôr\\: ${sunset}\n\n`;
+
+    // Recomendações como conselhos pessoais
+    if (weatherData.recommendations?.length > 0) {
+      message += `💡 *MEUS CONSELHOS*\n`;
+      weatherData.recommendations.slice(0, 3).forEach((rec) => {
+        const escapedRec = escapeMarkdown(rec)
+          .replace(/-/g, '\\-')
+          .replace(/:/g, '\\:');
+        message += `→ ${escapedRec}\n`;
+      });
+      message += '\n';
     }
 
-    if (weatherData.alerts?.hasAlerts && weatherData.alerts.count > 0) {
-      message += `\n⚠️ **Há ${weatherData.alerts.count} alerta(s) meteorológico(s) para esta região**\n`;
+    // Alertas com destaque especial
+    if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
+      message += `⚠️ *ATENÇÃO\\! ALERTAS ATIVOS* ⚠️\n`;
+      weatherData.alerts.items.slice(0, 2).forEach((alert) => {
+        const event = escapeMarkdown(alert.event)
+          .replace(/-/g, '\\-')
+          .replace(/:/g, '\\:');
+
+        const desc = escapeMarkdown(alert.description.slice(0, 120))
+          .replace(/-/g, '\\-')
+          .replace(/:/g, '\\:');
+
+        message += `‼️ *${event}*\n`;
+        message += `${desc}...\n\n`;
+      });
     }
 
-    message += `\n_Dados atualizados em tempo real_`;
+    message += `_Atualizado às ${escapeMarkdown(dateTime.time)}_`;
 
     return message;
   }
