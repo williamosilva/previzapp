@@ -1,3 +1,4 @@
+// src/modules/telegram/telegram.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
@@ -19,6 +20,47 @@ export class TelegramService {
     }
   }
 
+  async sendMessageWithInlineKeyboard(
+    chatId: number,
+    message: string,
+    keyboard: any,
+  ) {
+    try {
+      return await this.bot.telegram.sendMessage(chatId, message, {
+        parse_mode: 'Markdown',
+        reply_markup: keyboard,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Erro ao enviar mensagem com teclado inline: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async editMessage(
+    chatId: number,
+    messageId: number,
+    newText: string,
+    keyboard?: any,
+  ) {
+    try {
+      return await this.bot.telegram.editMessageText(
+        chatId,
+        messageId,
+        undefined,
+        newText,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: keyboard,
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Erro ao editar mensagem: ${error.message}`);
+      throw error;
+    }
+  }
+
   async sendTypingAction(chatId: number) {
     try {
       return await this.bot.telegram.sendChatAction(chatId, 'typing');
@@ -26,6 +68,7 @@ export class TelegramService {
       this.logger.error(`Erro ao enviar ação de digitação: ${error.message}`);
     }
   }
+
   async sendMessageWithMarkdown(chatId: number, message: string) {
     try {
       // Tentativa com MarkdownV2
@@ -71,6 +114,33 @@ export class TelegramService {
           throw finalError;
         }
       }
+    }
+  }
+
+  async answerCallbackQuery(
+    callbackQueryId: string,
+    text?: string,
+    showAlert?: boolean,
+  ) {
+    try {
+      return await this.bot.telegram.answerCbQuery(
+        callbackQueryId,
+        text,
+        // @ts-ignore
+        showAlert,
+      );
+    } catch (error) {
+      this.logger.error(`Erro ao responder callback query: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async deleteMessage(chatId: number, messageId: number) {
+    try {
+      return await this.bot.telegram.deleteMessage(chatId, messageId);
+    } catch (error) {
+      this.logger.error(`Erro ao deletar mensagem: ${error.message}`);
+      throw error;
     }
   }
 }
