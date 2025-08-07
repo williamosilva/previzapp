@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WeatherMessagesModule } from './modules/weather-messages/weather-messages.module';
 import { OpenWeatherModule } from './modules/open-weather/open-weather.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { TelegramModule } from './modules/telegram/telegram.module';
     OpenWeatherModule,
     WeatherMessagesModule,
     TelegramModule,
+    WhatsAppModule,
   ],
 })
 export class AppModule {}
