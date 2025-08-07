@@ -26,7 +26,6 @@ export class WeatherProcessorService {
 
     const processedAlerts = this.processAlerts(oneCallData.alerts);
 
-    // Combina todos os dados para o formato final de saída
     return {
       location: {
         address: addressName,
@@ -55,24 +54,19 @@ export class WeatherProcessorService {
     oneCallData: ProcessedOneCallData,
     timezone: string,
   ) {
-    console.log('Processing current data:', oneCallData);
-
     const { formattedDate, formattedTime } =
       this.weatherFormatter.formatDateTime(oneCallData.current.dt, timezone);
-
     const { formattedSunrise, formattedSunset } =
       this.weatherFormatter.formatSunTimes(
         oneCallData.current.sunrise,
         oneCallData.current.sunset,
         timezone,
       );
-
     const { tempCelsius, feelsLikeCelsius } =
       this.weatherFormatter.processTemperature(
         oneCallData.current.temp,
         oneCallData.current.feels_like,
       );
-
     const weatherInfo = oneCallData.current.weather[0];
     const processedWeather = {
       main: weatherInfo.main,

@@ -91,7 +91,6 @@ export class TranslationService {
     try {
       const translatedObj = JSON.parse(JSON.stringify(obj));
 
-      // Traduz os campos de texto que precisam ser traduzidos (Basicamente o json inteiro fora os valores fixos e numericos)
       if (
         translatedObj.recommendations &&
         Array.isArray(translatedObj.recommendations)

@@ -1,4 +1,3 @@
-// src/modules/telegram/telegram.service.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
@@ -71,7 +70,6 @@ export class TelegramService {
 
   async sendMessageWithMarkdown(chatId: number, message: string) {
     try {
-      // Tentativa com MarkdownV2
       return await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'MarkdownV2',
         // @ts-ignore
@@ -82,7 +80,6 @@ export class TelegramService {
         `Falha no MarkdownV2 (${markdownError.message}), tentando HTML...`,
       );
 
-      // Fallback para HTML se falhar
       try {
         const htmlMessage = message
           .replace(/\\([_*\[\]()~`>#+\-=|{}.!:-])/g, '$1') // Remove escapes
@@ -98,12 +95,11 @@ export class TelegramService {
           `Falha no HTML (${htmlError.message}), tentando texto simples...`,
         );
 
-        // Fallback final para texto simples
         try {
           const plainMessage = message
-            .replace(/\\([_*\[\]()~`>#+\-=|{}.!:-])/g, '$1') // Remove escapes
-            .replace(/\*/g, '') // Remove asteriscos
-            .replace(/_/g, ''); // Remove underscores
+            .replace(/\\([_*\[\]()~`>#+\-=|{}.!:-])/g, '$1')
+            .replace(/\*/g, '')
+            .replace(/_/g, '');
 
           return await this.bot.telegram.sendMessage(chatId, plainMessage, {
             // @ts-ignore

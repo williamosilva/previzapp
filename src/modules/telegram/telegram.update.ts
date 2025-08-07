@@ -47,10 +47,10 @@ export class TelegramUpdate {
     this.userSessions.delete(chatId);
 
     const welcomeMessage = [
-      I18nService.t('WELCOME_TITLE', 'pt'),
-      I18nService.t('WELCOME_MESSAGE', 'pt'),
-      I18nService.t('WELCOME_EXAMPLES', 'pt'),
-      I18nService.t('WELCOME_HELP_TIP', 'pt'),
+      I18nService.t('WELCOME_TITLE', 'en'),
+      I18nService.t('WELCOME_MESSAGE', 'en'),
+      I18nService.t('WELCOME_EXAMPLES', 'en'),
+      I18nService.t('WELCOME_HELP_TIP', 'en'),
     ].join('\n\n');
 
     await ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
@@ -59,20 +59,20 @@ export class TelegramUpdate {
   @Command('help')
   async help(@Ctx() ctx: Context) {
     const helpMessage = [
-      I18nService.t('HELP_TITLE', 'pt'),
+      I18nService.t('HELP_TITLE', 'en'),
       '',
-      I18nService.t('HELP_STEP1', 'pt'),
-      I18nService.t('HELP_STEP2', 'pt'),
-      I18nService.t('HELP_STEP3', 'pt'),
+      I18nService.t('HELP_STEP1', 'en'),
+      I18nService.t('HELP_STEP2', 'en'),
+      I18nService.t('HELP_STEP3', 'en'),
       '',
-      I18nService.t('HELP_AVAILABLE_COMMANDS', 'pt'),
-      I18nService.t('HELP_START_COMMAND', 'pt'),
-      I18nService.t('HELP_HELP_COMMAND', 'pt'),
-      I18nService.t('HELP_CANCEL_COMMAND', 'pt'),
+      I18nService.t('HELP_AVAILABLE_COMMANDS', 'en'),
+      I18nService.t('HELP_START_COMMAND', 'en'),
+      I18nService.t('HELP_HELP_COMMAND', 'en'),
+      I18nService.t('HELP_CANCEL_COMMAND', 'en'),
       '',
-      I18nService.t('HELP_USAGE_EXAMPLES', 'pt'),
+      I18nService.t('HELP_USAGE_EXAMPLES', 'en'),
       '',
-      I18nService.t('HELP_SUPPORTED_LANGUAGES', 'pt'),
+      I18nService.t('HELP_SUPPORTED_LANGUAGES', 'en'),
     ].join('\n');
 
     await ctx.reply(helpMessage, { parse_mode: 'Markdown' });
@@ -84,7 +84,7 @@ export class TelegramUpdate {
     const chatId = ctx.chat.id;
 
     this.userSessions.delete(chatId);
-    await ctx.reply(I18nService.t('ERROR_OPERATION_CANCELLED', 'pt'));
+    await ctx.reply(I18nService.t('ERROR_OPERATION_CANCELLED', 'en'));
   }
 
   @On('text')
@@ -92,7 +92,7 @@ export class TelegramUpdate {
     const message = ctx.message;
     // @ts-ignore
     if (!('text' in message)) {
-      await ctx.reply(I18nService.t('ERROR_TEXT_ONLY', 'pt'));
+      await ctx.reply(I18nService.t('ERROR_TEXT_ONLY', 'en'));
       return;
     }
 
@@ -142,8 +142,8 @@ export class TelegramUpdate {
     };
 
     const languageMessage = [
-      I18nService.t('LANGUAGE_SELECTION_TITLE', 'pt', { location }),
-      I18nService.t('LANGUAGE_SELECTION_MESSAGE', 'pt'),
+      I18nService.t('LANGUAGE_SELECTION_TITLE', 'en', { location }),
+      I18nService.t('LANGUAGE_SELECTION_MESSAGE', 'en'),
     ].join('\n\n');
 
     try {
@@ -156,12 +156,12 @@ export class TelegramUpdate {
       this.logger.warn('Falha no inline keyboard, usando fallback text');
 
       let fallbackMessage =
-        I18nService.t('LANGUAGE_FALLBACK_MESSAGE', 'pt', { location }) + '\n\n';
+        I18nService.t('LANGUAGE_FALLBACK_MESSAGE', 'en', { location }) + '\n\n';
       Object.keys(this.languages).forEach((lang, index) => {
         fallbackMessage += `${index + 1}. ${lang}\n`;
       });
       fallbackMessage +=
-        '\n' + I18nService.t('LANGUAGE_FALLBACK_INSTRUCTION', 'pt');
+        '\n' + I18nService.t('LANGUAGE_FALLBACK_INSTRUCTION', 'en');
 
       await ctx.reply(fallbackMessage, { parse_mode: 'Markdown' });
     }
@@ -174,7 +174,7 @@ export class TelegramUpdate {
   ) {
     const session = this.userSessions.get(chatId);
     if (!session || !session.location) {
-      await ctx.reply(I18nService.t('ERROR_INVALID_SESSION', 'pt'));
+      await ctx.reply(I18nService.t('ERROR_INVALID_SESSION', 'en'));
       this.userSessions.delete(chatId);
       return;
     }
@@ -203,7 +203,7 @@ export class TelegramUpdate {
     }
 
     if (!selectedLanguageCode) {
-      await ctx.reply(I18nService.t('ERROR_LANGUAGE_NOT_RECOGNIZED', 'pt'));
+      await ctx.reply(I18nService.t('ERROR_LANGUAGE_NOT_RECOGNIZED', 'en'));
       return;
     }
 
@@ -226,7 +226,7 @@ export class TelegramUpdate {
       const session = this.userSessions.get(chatId);
 
       if (!session || !session.location) {
-        await ctx.answerCbQuery(I18nService.t('ERROR_SESSION_EXPIRED', 'pt'));
+        await ctx.answerCbQuery(I18nService.t('ERROR_SESSION_EXPIRED', 'en'));
         return;
       }
 
@@ -287,7 +287,7 @@ export class TelegramUpdate {
 
       let errorMessage = I18nService.t(
         'ERROR_WEATHER_FETCH',
-        selectedLanguage || 'pt',
+        selectedLanguage || 'en',
       );
       if (
         error.message?.includes('not found') ||
@@ -295,7 +295,7 @@ export class TelegramUpdate {
       ) {
         errorMessage = I18nService.t(
           'ERROR_CITY_NOT_FOUND',
-          selectedLanguage || 'pt',
+          selectedLanguage || 'en',
         );
       } else if (
         error.message?.includes('network') ||
@@ -303,7 +303,7 @@ export class TelegramUpdate {
       ) {
         errorMessage = I18nService.t(
           'ERROR_NETWORK_PROBLEM',
-          selectedLanguage || 'pt',
+          selectedLanguage || 'en',
         );
       }
 

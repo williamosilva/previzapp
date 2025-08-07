@@ -67,16 +67,14 @@ export interface TranslationKeys {
 
 export const translations: Record<string, TranslationKeys> = {
   pt: {
-    // Mensagens de boas-vindas
-    WELCOME_TITLE: '🌤️ *Bem-vindo ao Bot de Clima!*',
+    WELCOME_TITLE: '🌤️ *Bem-vindo ao Bot Previzapp!*',
     WELCOME_MESSAGE:
       'Envie o nome de uma cidade ou endereço e eu te darei as informações meteorológicas em seu idioma preferido!',
     WELCOME_EXAMPLES:
       'Exemplos:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Digite /help para mais informações.',
 
-    // Comandos de ajuda
-    HELP_TITLE: '🆘 *Como usar o Bot de Clima:*',
+    HELP_TITLE: '🆘 *Como usar o Bot Previzapp:*',
     HELP_STEP1: '1️⃣ Envie o nome de uma cidade',
     HELP_STEP2: '2️⃣ Escolha seu idioma preferido',
     HELP_STEP3: '3️⃣ Receba as informações meteorológicas',
@@ -89,14 +87,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Idiomas suportados:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Seleção de idioma
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Escolha seu idioma preferido para {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Selecione uma opção abaixo:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Escolha seu idioma para {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Digite o número da sua escolha (1-9):',
 
-    // Mensagens de erro
     ERROR_TEXT_ONLY:
       'Por favor, envie apenas mensagens de texto com o nome da cidade.',
     ERROR_OPERATION_CANCELLED:
@@ -113,13 +109,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Problema de conexão. Tente novamente em alguns instantes.',
 
-    // Feedback e navegação
     LANGUAGE_SELECTED: 'Idioma selecionado: {language}',
     NEW_CONSULTATION_TIP:
       '🔄 Digite o nome de outra cidade para uma nova consulta!',
     TYPING_ACTION: 'Digitando...',
 
-    // Formatação da resposta do clima
     WEATHER_FORECAST_FOR: '🌤️ *PREVISÃO PARA\\: {location}*',
     CURRENT_CONDITIONS: '📊 *CONDIÇÕES ATUAIS*',
     TEMPERATURE_LABEL: '🌡️ Temperatura',
@@ -145,16 +139,14 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   en: {
-    // Welcome messages
-    WELCOME_TITLE: '🌤️ *Welcome to the Weather Bot!*',
+    WELCOME_TITLE: '🌤️ *Welcome to the Previzapp!*',
     WELCOME_MESSAGE:
       'Send the name of a city or address and I will give you weather information in your preferred language!',
     WELCOME_EXAMPLES:
       'Examples:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Type /help for more information.',
 
-    // Help commands
-    HELP_TITLE: '🆘 *How to use the Weather Bot:*',
+    HELP_TITLE: '🆘 *How to use the Previzapp:*',
     HELP_STEP1: '1️⃣ Send the name of a city',
     HELP_STEP2: '2️⃣ Choose your preferred language',
     HELP_STEP3: '3️⃣ Receive weather information',
@@ -167,14 +159,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Supported languages:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Language selection
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Choose your preferred language for {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Select an option below:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Choose your language for {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Type the number of your choice (1-9):',
 
-    // Error messages
     ERROR_TEXT_ONLY: 'Please send only text messages with the city name.',
     ERROR_OPERATION_CANCELLED:
       '❌ Operation cancelled. Type a city name to start again.',
@@ -188,12 +178,10 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_CITY_NOT_FOUND: '🏙️ City not found. Check the name and try again.',
     ERROR_NETWORK_PROBLEM: '🌐 Connection problem. Try again in a few moments.',
 
-    // Feedback and navigation
     LANGUAGE_SELECTED: 'Language selected: {language}',
     NEW_CONSULTATION_TIP: '🔄 Type another city name for a new query!',
     TYPING_ACTION: 'Typing...',
 
-    // Weather response formatting
     WEATHER_FORECAST_FOR: '🌤️ *FORECAST FOR\\: {location}*',
     CURRENT_CONDITIONS: '📊 *CURRENT CONDITIONS*',
     TEMPERATURE_LABEL: '🌡️ Temperature',
@@ -219,16 +207,14 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   es: {
-    // Mensajes de bienvenida
-    WELCOME_TITLE: '🌤️ *¡Bienvenido al Bot del Clima!*',
+    WELCOME_TITLE: '🌤️ *¡Bienvenido al Bot Previzapp!*',
     WELCOME_MESSAGE:
       '¡Envía el nombre de una ciudad o dirección y te daré la información meteorológica en tu idioma preferido!',
     WELCOME_EXAMPLES:
       'Ejemplos:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Escribe /help para más información.',
 
-    // Comandos de ayuda
-    HELP_TITLE: '🆘 *Cómo usar el Bot del Clima:*',
+    HELP_TITLE: '🆘 *Cómo usar el Bot Previzapp:*',
     HELP_STEP1: '1️⃣ Envía el nombre de una ciudad',
     HELP_STEP2: '2️⃣ Elige tu idioma preferido',
     HELP_STEP3: '3️⃣ Recibe la información meteorológica',
@@ -241,13 +227,11 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Idiomas soportados:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Selección de idioma
     LANGUAGE_SELECTION_TITLE: '🌍 *Elige tu idioma preferido para {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Selecciona una opción abajo:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Elige tu idioma para {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Escribe el número de tu elección (1-9):',
 
-    // Mensajes de error
     ERROR_TEXT_ONLY:
       'Por favor, envía solo mensajes de texto con el nombre de la ciudad.',
     ERROR_OPERATION_CANCELLED:
@@ -264,13 +248,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Problema de conexión. Inténtalo de nuevo en unos momentos.',
 
-    // Retroalimentación y navegación
     LANGUAGE_SELECTED: 'Idioma seleccionado: {language}',
     NEW_CONSULTATION_TIP:
       '🔄 ¡Escribe el nombre de otra ciudad para una nueva consulta!',
     TYPING_ACTION: 'Escribiendo...',
 
-    // Formateo de respuesta del clima
     WEATHER_FORECAST_FOR: '🌤️ *PRONÓSTICO PARA\\: {location}*',
     CURRENT_CONDITIONS: '📊 *CONDICIONES ACTUALES*',
     TEMPERATURE_LABEL: '🌡️ Temperatura',
@@ -296,16 +278,14 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   fr: {
-    // Messages de bienvenue
-    WELCOME_TITLE: '🌤️ *Bienvenue au Bot Météo!*',
+    WELCOME_TITLE: '🌤️ *Bienvenue au Bot Previzapp!*',
     WELCOME_MESSAGE:
       "Envoyez le nom d'une ville ou une adresse et je vous donnerai les informations météorologiques dans votre langue préférée!",
     WELCOME_EXAMPLES:
       'Exemples:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: "Tapez /help pour plus d'informations.",
 
-    // Commandes d'aide
-    HELP_TITLE: '🆘 *Comment utiliser le Bot Météo:*',
+    HELP_TITLE: '🆘 *Comment utiliser le Bot Previzapp:*',
     HELP_STEP1: "1️⃣ Envoyez le nom d'une ville",
     HELP_STEP2: '2️⃣ Choisissez votre langue préférée',
     HELP_STEP3: '3️⃣ Recevez les informations météorologiques',
@@ -318,14 +298,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Langues supportées:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Sélection de langue
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Choisissez votre langue préférée pour {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Sélectionnez une option ci-dessous:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Choisissez votre langue pour {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Tapez le numéro de votre choix (1-9):',
 
-    // Messages d'erreur
     ERROR_TEXT_ONLY:
       'Veuillez envoyer uniquement des messages texte avec le nom de la ville.',
     ERROR_OPERATION_CANCELLED:
@@ -341,13 +319,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Problème de connexion. Réessayez dans quelques instants.',
 
-    // Commentaires et navigation
     LANGUAGE_SELECTED: 'Langue sélectionnée: {language}',
     NEW_CONSULTATION_TIP:
       "🔄 Tapez le nom d'une autre ville pour une nouvelle consultation!",
     TYPING_ACTION: 'En train de taper...',
 
-    // Formatage de réponse météo
     WEATHER_FORECAST_FOR: '🌤️ *PRÉVISIONS POUR\\: {location}*',
     CURRENT_CONDITIONS: '📊 *CONDITIONS ACTUELLES*',
     TEMPERATURE_LABEL: '🌡️ Température',
@@ -371,18 +347,15 @@ export const translations: Record<string, TranslationKeys> = {
     SUMMARY_TITLE: '💬 *RÉSUMÉ DU JOUR*',
     NO_DESCRIPTION: 'Aucune description',
   },
-
   de: {
-    // Willkommensnachrichten
-    WELCOME_TITLE: '🌤️ *Willkommen beim Wetter-Bot!*',
+    WELCOME_TITLE: '🌤️ *Willkommen beim Previzapp!*',
     WELCOME_MESSAGE:
       'Senden Sie den Namen einer Stadt oder Adresse und ich gebe Ihnen Wetterinformationen in Ihrer bevorzugten Sprache!',
     WELCOME_EXAMPLES:
       'Beispiele:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Tippen Sie /help für weitere Informationen.',
 
-    // Hilfebefehle
-    HELP_TITLE: '🆘 *So verwenden Sie den Wetter-Bot:*',
+    HELP_TITLE: '🆘 *So verwenden Sie den Previzapp:*',
     HELP_STEP1: '1️⃣ Senden Sie den Namen einer Stadt',
     HELP_STEP2: '2️⃣ Wählen Sie Ihre bevorzugte Sprache',
     HELP_STEP3: '3️⃣ Erhalten Sie Wetterinformationen',
@@ -395,14 +368,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Unterstützte Sprachen:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Sprachauswahl
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Wählen Sie Ihre bevorzugte Sprache für {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Wählen Sie eine Option unten:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Wählen Sie Ihre Sprache für {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Tippen Sie die Nummer Ihrer Wahl (1-9):',
 
-    // Fehlermeldungen
     ERROR_TEXT_ONLY: 'Bitte senden Sie nur Textnachrichten mit dem Stadtnamen.',
     ERROR_OPERATION_CANCELLED:
       '❌ Vorgang abgebrochen. Tippen Sie einen Stadtnamen, um neu zu starten.',
@@ -419,13 +390,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Verbindungsproblem. Versuchen Sie es in wenigen Augenblicken erneut.',
 
-    // Feedback und Navigation
     LANGUAGE_SELECTED: 'Sprache ausgewählt: {language}',
     NEW_CONSULTATION_TIP:
       '🔄 Tippen Sie einen anderen Stadtnamen für eine neue Abfrage!',
     TYPING_ACTION: 'Tippt...',
 
-    // Wetter-Antwort-Formatierung
     WEATHER_FORECAST_FOR: '🌤️ *VORHERSAGE FÜR\\: {location}*',
     CURRENT_CONDITIONS: '📊 *AKTUELLE BEDINGUNGEN*',
     TEMPERATURE_LABEL: '🌡️ Temperatur',
@@ -451,16 +420,14 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   it: {
-    // Messaggi di benvenuto
-    WELCOME_TITLE: '🌤️ *Benvenuto al Bot Meteo!*',
+    WELCOME_TITLE: '🌤️ *Benvenuto al Bot Previzapp!*',
     WELCOME_MESSAGE:
       'Invia il nome di una città o indirizzo e ti darò le informazioni meteorologiche nella tua lingua preferita!',
     WELCOME_EXAMPLES:
       'Esempi:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Digita /help per maggiori informazioni.',
 
-    // Comandi di aiuto
-    HELP_TITLE: '🆘 *Come usare il Bot Meteo:*',
+    HELP_TITLE: '🆘 *Come usare il Bot Previzapp:*',
     HELP_STEP1: '1️⃣ Invia il nome di una città',
     HELP_STEP2: '2️⃣ Scegli la tua lingua preferita',
     HELP_STEP3: '3️⃣ Ricevi le informazioni meteorologiche',
@@ -473,14 +440,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Lingue supportate:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Selezione lingua
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Scegli la tua lingua preferita per {location}:*',
     LANGUAGE_SELECTION_MESSAGE: "Seleziona un'opzione qui sotto:",
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Scegli la tua lingua per {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Digita il numero della tua scelta (1-9):',
 
-    // Messaggi di errore
     ERROR_TEXT_ONLY:
       'Per favore, invia solo messaggi di testo con il nome della città.',
     ERROR_OPERATION_CANCELLED:
@@ -496,13 +461,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Problema di connessione. Riprova tra qualche istante.',
 
-    // Feedback e navigazione
     LANGUAGE_SELECTED: 'Lingua selezionata: {language}',
     NEW_CONSULTATION_TIP:
       "🔄 Digita il nome di un'altra città per una nuova consultazione!",
     TYPING_ACTION: 'Digitando...',
 
-    // Formattazione risposta meteo
     WEATHER_FORECAST_FOR: '🌤️ *PREVISIONI PER\\: {location}*',
     CURRENT_CONDITIONS: '📊 *CONDIZIONI ATTUALI*',
     TEMPERATURE_LABEL: '🌡️ Temperatura',
@@ -528,7 +491,6 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   ru: {
-    // Приветственные сообщения
     WELCOME_TITLE: '🌤️ *Добро пожаловать в Погодного Бота!*',
     WELCOME_MESSAGE:
       'Отправьте название города или адрес, и я дам вам информацию о погоде на вашем предпочтительном языке!',
@@ -536,7 +498,6 @@ export const translations: Record<string, TranslationKeys> = {
       'Примеры:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: 'Наберите /help для получения дополнительной информации.',
 
-    // Команды помощи
     HELP_TITLE: '🆘 *Как использовать Погодного Бота:*',
     HELP_STEP1: '1️⃣ Отправьте название города',
     HELP_STEP2: '2️⃣ Выберите предпочтительный язык',
@@ -550,14 +511,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*Поддерживаемые языки:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // Выбор языка
     LANGUAGE_SELECTION_TITLE:
       '🌍 *Выберите предпочтительный язык для {location}:*',
     LANGUAGE_SELECTION_MESSAGE: 'Выберите вариант ниже:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *Выберите ваш язык для {location}:*',
     LANGUAGE_FALLBACK_INSTRUCTION: 'Введите номер вашего выбора (1-9):',
 
-    // Сообщения об ошибках
     ERROR_TEXT_ONLY:
       'Пожалуйста, отправляйте только текстовые сообщения с названием города.',
     ERROR_OPERATION_CANCELLED:
@@ -574,13 +533,11 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 Проблема с подключением. Попробуйте снова через несколько мгновений.',
 
-    // Обратная связь и навигация
     LANGUAGE_SELECTED: 'Выбран язык: {language}',
     NEW_CONSULTATION_TIP:
       '🔄 Введите название другого города для нового запроса!',
     TYPING_ACTION: 'Печатает...',
 
-    // Форматирование ответа о погоде
     WEATHER_FORECAST_FOR: '🌤️ *ПРОГНОЗ ДЛЯ\\: {location}*',
     CURRENT_CONDITIONS: '📊 *ТЕКУЩИЕ УСЛОВИЯ*',
     TEMPERATURE_LABEL: '🌡️ Температура',
@@ -606,7 +563,6 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   ja: {
-    // ウェルカムメッセージ
     WELCOME_TITLE: '🌤️ *天気ボットへようこそ！*',
     WELCOME_MESSAGE:
       '都市名や住所を送信していただければ、お好みの言語で天気情報をお知らせします！',
@@ -614,7 +570,6 @@ export const translations: Record<string, TranslationKeys> = {
       '例:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: '詳細については/helpと入力してください。',
 
-    // ヘルプコマンド
     HELP_TITLE: '🆘 *天気ボットの使い方:*',
     HELP_STEP1: '1️⃣ 都市名を送信',
     HELP_STEP2: '2️⃣ お好みの言語を選択',
@@ -628,14 +583,12 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*サポート言語:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // 言語選択
     LANGUAGE_SELECTION_TITLE:
       '🌍 *{location}のお好みの言語を選択してください:*',
     LANGUAGE_SELECTION_MESSAGE: '以下のオプションを選択してください:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *{location}の言語を選択してください:*',
     LANGUAGE_FALLBACK_INSTRUCTION: '選択番号を入力してください (1-9):',
 
-    // エラーメッセージ
     ERROR_TEXT_ONLY: '都市名のテキストメッセージのみ送信してください。',
     ERROR_OPERATION_CANCELLED:
       '❌ 操作がキャンセルされました。再開するには都市名を入力してください。',
@@ -652,12 +605,10 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_NETWORK_PROBLEM:
       '🌐 接続の問題です。しばらくしてから再試行してください。',
 
-    // フィードバックとナビゲーション
     LANGUAGE_SELECTED: '選択された言語: {language}',
     NEW_CONSULTATION_TIP: '🔄 新しい検索のために他の都市名を入力してください！',
     TYPING_ACTION: '入力中...',
 
-    // 天気レスポンスフォーマット
     WEATHER_FORECAST_FOR: '🌤️ *{location}の予報*',
     CURRENT_CONDITIONS: '📊 *現在の状況*',
     TEMPERATURE_LABEL: '🌡️ 気温',
@@ -683,14 +634,12 @@ export const translations: Record<string, TranslationKeys> = {
   },
 
   zh: {
-    // 欢迎消息
     WELCOME_TITLE: '🌤️ *欢迎使用天气机器人！*',
     WELCOME_MESSAGE: '发送城市名称或地址，我将为您提供您首选语言的天气信息！',
     WELCOME_EXAMPLES:
       '示例:\n• São Paulo\n• Rio de Janeiro, RJ\n• New York\n• London, UK',
     WELCOME_HELP_TIP: '输入 /help 获取更多信息。',
 
-    // 帮助命令
     HELP_TITLE: '🆘 *如何使用天气机器人:*',
     HELP_STEP1: '1️⃣ 发送城市名称',
     HELP_STEP2: '2️⃣ 选择您的首选语言',
@@ -704,13 +653,11 @@ export const translations: Record<string, TranslationKeys> = {
     HELP_SUPPORTED_LANGUAGES:
       '*支持的语言:*\n🇧🇷 Português | 🇺🇸 English | 🇪🇸 Español\n🇫🇷 Français | 🇩🇪 Deutsch | 🇮🇹 Italiano\n🇷🇺 Русский | 🇯🇵 日本語 | 🇨🇳 中文',
 
-    // 语言选择
     LANGUAGE_SELECTION_TITLE: '🌍 *选择您对 {location} 的首选语言:*',
     LANGUAGE_SELECTION_MESSAGE: '请选择下面的选项:',
     LANGUAGE_FALLBACK_MESSAGE: '🌍 *选择您对 {location} 的语言:*',
     LANGUAGE_FALLBACK_INSTRUCTION: '输入您的选择编号 (1-9):',
 
-    // 错误消息
     ERROR_TEXT_ONLY: '请只发送包含城市名称的文本消息。',
     ERROR_OPERATION_CANCELLED: '❌ 操作已取消。输入城市名称重新开始。',
     ERROR_INVALID_SESSION: '❌ 错误: 无效会话。输入城市名称开始。',
@@ -721,12 +668,10 @@ export const translations: Record<string, TranslationKeys> = {
     ERROR_CITY_NOT_FOUND: '🏙️ 未找到城市。检查名称并重试。',
     ERROR_NETWORK_PROBLEM: '🌐 连接问题。请稍后重试。',
 
-    // 反馈和导航
     LANGUAGE_SELECTED: '已选择语言: {language}',
     NEW_CONSULTATION_TIP: '🔄 输入另一个城市名称进行新查询！',
     TYPING_ACTION: '正在输入...',
 
-    // 天气响应格式
     WEATHER_FORECAST_FOR: '🌤️ *{location} 的天气预报*',
     CURRENT_CONDITIONS: '📊 *当前状况*',
     TEMPERATURE_LABEL: '🌡️ 温度',
@@ -752,24 +697,15 @@ export const translations: Record<string, TranslationKeys> = {
   },
 };
 
-// Classe utilitária para gerenciar traduções
 export class I18nService {
-  /**
-   * Obtém uma tradução para uma chave específica e idioma
-   * @param key - Chave da tradução
-   * @param lang - Código ISO do idioma (pt, en, es, etc.)
-   * @param placeholders - Objeto com placeholders para substituir na string
-   * @returns String traduzida
-   */
   static t(
     key: keyof TranslationKeys,
-    lang: string = 'pt',
+    lang: string = 'en',
     placeholders?: Record<string, string>,
   ): string {
     const translation = translations[lang] || translations['pt'];
     let text = translation[key] || translations['pt'][key];
 
-    // Substituir placeholders se fornecidos
     if (placeholders) {
       Object.entries(placeholders).forEach(([placeholder, value]) => {
         text = text.replace(new RegExp(`\\{${placeholder}\\}`, 'g'), value);
@@ -779,28 +715,14 @@ export class I18nService {
     return text;
   }
 
-  /**
-   * Verifica se um idioma é suportado
-   * @param lang - Código ISO do idioma
-   * @returns boolean
-   */
   static isLanguageSupported(lang: string): boolean {
     return lang in translations;
   }
 
-  /**
-   * Obtém lista de todos os idiomas suportados
-   * @returns Array com códigos ISO dos idiomas
-   */
   static getSupportedLanguages(): string[] {
     return Object.keys(translations);
   }
 
-  /**
-   * Obtém o nome do idioma em formato de exibição
-   * @param lang - Código ISO do idioma
-   * @returns Nome do idioma com emoji
-   */
   static getLanguageDisplayName(lang: string): string {
     const languageMap: Record<string, string> = {
       pt: '🇧🇷 Português',
@@ -816,15 +738,10 @@ export class I18nService {
     return languageMap[lang] || languageMap['pt'];
   }
 
-  /**
-   * Obtém o idioma padrão baseado no idioma da sessão ou padrão
-   * @param sessionLang - Idioma da sessão atual
-   * @returns Código ISO do idioma
-   */
   static getDefaultLanguage(sessionLang?: string): string {
     if (sessionLang && this.isLanguageSupported(sessionLang)) {
       return sessionLang;
     }
-    return 'pt'; // Padrão
+    return 'en';
   }
 }

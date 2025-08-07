@@ -28,17 +28,13 @@ export class WeatherFormatterService {
     formattedTime: string;
   } {
     const dateTime = new Date(timestamp * 1000);
-
     const formattedTime = dateTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
       timeZone: timezone,
     });
-
-    // Determinar o locale baseado no timezone
     const locale = this.getLocaleFromTimezone(timezone);
-
     const formattedDate = dateTime.toLocaleDateString(locale, {
       timeZone: timezone,
       year: 'numeric',
@@ -56,7 +52,6 @@ export class WeatherFormatterService {
   ): { formattedSunrise: string; formattedSunset: string } {
     const sunriseTime = new Date(sunrise * 1000);
     const sunsetTime = new Date(sunset * 1000);
-
     const formattedSunrise = sunriseTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
@@ -79,10 +74,8 @@ export class WeatherFormatterService {
     end: number,
   ): { formattedStartTime: string; formattedEndTime: string } {
     const timezoneOffset = -3 * 60 * 60 * 1000;
-
     const startTime = new Date(start * 1000 + timezoneOffset);
     const endTime = new Date(end * 1000 + timezoneOffset);
-
     const formattedStartTime = `${startTime.toISOString().split('T')[0]} ${startTime.toLocaleTimeString(
       'en-US',
       {
@@ -112,7 +105,6 @@ export class WeatherFormatterService {
   ): { tempCelsius: number; feelsLikeCelsius: number } {
     const tempCelsius = temp - 273.15;
     const feelsLikeCelsius = feelsLike - 273.15;
-
     return { tempCelsius, feelsLikeCelsius };
   }
 
