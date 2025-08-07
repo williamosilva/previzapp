@@ -22,13 +22,13 @@ export class WeatherMessageService {
     address: string,
     lang: string,
   ): Promise<WeatherResponse> {
+    console.log(`Obtendo dados do tempo para: ${address} no idioma: ${lang}`);
     const coordinates =
       await this.geolocationService.getCoordinatesFromAddress(address);
     const latitude = coordinates.latitude;
     const longitude = coordinates.longitude;
     const addressName = coordinates.address;
 
-    // Executa ambas as chamadas em paralelo
     const [overviewData, oneCallData] = await Promise.all([
       firstValueFrom(
         this.openWeatherService.getWeatherOverview({
@@ -44,15 +44,11 @@ export class WeatherMessageService {
       ),
     ]);
 
-    // console.log(
-    //   `Dados obtidos para ${addressName}:`,
-    //   JSON.stringify({ oneCallData }, null, 2),
-    // );
-
     const combinedData = this.weatherProcessor.processWeatherData(
       overviewData,
       oneCallData,
       addressName,
+      oneCallData.location.timezone,
     );
 
     return await this.translationService.translateObject(combinedData, lang);

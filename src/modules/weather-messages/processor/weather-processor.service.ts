@@ -20,10 +20,9 @@ export class WeatherProcessorService {
     overviewData: ProcessedWeatherOverview,
     oneCallData: ProcessedOneCallData,
     addressName: string = '',
+    timezone: string = 'America/Sao_Paulo',
   ): WeatherResponse {
-    const processedCurrentData = this.processCurrentData(oneCallData);
-    // console.log('onecallData:', oneCallData);
-    // console.log('processedCurrentData:', processedCurrentData);
+    const processedCurrentData = this.processCurrentData(oneCallData, timezone);
 
     const processedAlerts = this.processAlerts(oneCallData.alerts);
 
@@ -52,27 +51,28 @@ export class WeatherProcessorService {
     };
   }
 
-  private processCurrentData(oneCallData: ProcessedOneCallData) {
-    // Processar data e hora
+  private processCurrentData(
+    oneCallData: ProcessedOneCallData,
+    timezone: string,
+  ) {
     console.log('Processing current data:', oneCallData);
-    const { formattedDate, formattedTime } =
-      this.weatherFormatter.formatDateTime(oneCallData.current.dt);
 
-    // Processa horários de nascer e pôr do sol
+    const { formattedDate, formattedTime } =
+      this.weatherFormatter.formatDateTime(oneCallData.current.dt, timezone);
+
     const { formattedSunrise, formattedSunset } =
       this.weatherFormatter.formatSunTimes(
         oneCallData.current.sunrise,
         oneCallData.current.sunset,
+        timezone,
       );
 
-    // Processa temperatura
     const { tempCelsius, feelsLikeCelsius } =
       this.weatherFormatter.processTemperature(
         oneCallData.current.temp,
         oneCallData.current.feels_like,
       );
 
-    // Processa dados do clima atual
     const weatherInfo = oneCallData.current.weather[0];
     const processedWeather = {
       main: weatherInfo.main,
@@ -85,7 +85,6 @@ export class WeatherProcessorService {
       },
     };
 
-    // Formata objeto current
     const processedCurrent = {
       sun: {
         sunrise: formattedSunrise,

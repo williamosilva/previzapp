@@ -2,22 +2,49 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class WeatherFormatterService {
-  formatDateTime(timestamp: number): {
+  private getLocaleFromTimezone(timezone: string): string {
+    const timezoneToLocale: Record<string, string> = {
+      'America/Sao_Paulo': 'pt-BR',
+      'America/Manaus': 'pt-BR',
+      'America/Belem': 'pt-BR',
+      'America/Fortaleza': 'pt-BR',
+      'America/Recife': 'pt-BR',
+      'America/Bahia': 'pt-BR',
+      'America/Campo_Grande': 'pt-BR',
+      'America/Cuiaba': 'pt-BR',
+      'America/Porto_Velho': 'pt-BR',
+      'America/Boa_Vista': 'pt-BR',
+      'America/Rio_Branco': 'pt-BR',
+    };
+
+    return timezoneToLocale[timezone] || 'en-CA';
+  }
+
+  formatDateTime(
+    timestamp: number,
+    timezone: string = 'America/Sao_Paulo',
+  ): {
     formattedDate: string;
     formattedTime: string;
   } {
-    // Aplicar offset de São Paulo (UTC-3)
-    const timezoneOffset = -3 * 60 * 60 * 1000; // -3 horas em millisegundos
-    const dateTime = new Date(timestamp * 1000 + timezoneOffset);
+    const dateTime = new Date(timestamp * 1000);
 
     const formattedTime = dateTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: 'UTC', // Usar UTC pois já aplicamos o offset manualmente
+      timeZone: timezone,
     });
 
-    const formattedDate = dateTime.toISOString().split('T')[0];
+    // Determinar o locale baseado no timezone
+    const locale = this.getLocaleFromTimezone(timezone);
+
+    const formattedDate = dateTime.toLocaleDateString(locale, {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
 
     return { formattedDate, formattedTime };
   }
@@ -25,24 +52,23 @@ export class WeatherFormatterService {
   formatSunTimes(
     sunrise: number,
     sunset: number,
+    timezone: string = 'America/Sao_Paulo',
   ): { formattedSunrise: string; formattedSunset: string } {
-    const timezoneOffset = -3 * 60 * 60 * 1000;
-
-    const sunriseTime = new Date(sunrise * 1000 + timezoneOffset);
-    const sunsetTime = new Date(sunset * 1000 + timezoneOffset);
+    const sunriseTime = new Date(sunrise * 1000);
+    const sunsetTime = new Date(sunset * 1000);
 
     const formattedSunrise = sunriseTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: 'UTC',
+      timeZone: timezone,
     });
 
     const formattedSunset = sunsetTime.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
-      timeZone: 'UTC',
+      timeZone: timezone,
     });
 
     return { formattedSunrise, formattedSunset };
