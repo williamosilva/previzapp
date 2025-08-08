@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
+//@ts-ignore
 import { Telegraf } from 'telegraf';
 
 @Injectable()
@@ -14,7 +15,7 @@ export class TelegramService {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      this.logger.error(`Erro ao enviar mensagem: ${error.message}`);
+      this.logger.error(`Error sending message: ${error.message}`);
       throw error;
     }
   }
@@ -31,7 +32,7 @@ export class TelegramService {
       });
     } catch (error) {
       this.logger.error(
-        `Erro ao enviar mensagem com teclado inline: ${error.message}`,
+        `Error sending message with inline keyboard: ${error.message}`,
       );
       throw error;
     }
@@ -55,7 +56,7 @@ export class TelegramService {
         },
       );
     } catch (error) {
-      this.logger.error(`Erro ao editar mensagem: ${error.message}`);
+      this.logger.error(`Error editing message: ${error.message}`);
       throw error;
     }
   }
@@ -64,7 +65,7 @@ export class TelegramService {
     try {
       return await this.bot.telegram.sendChatAction(chatId, 'typing');
     } catch (error) {
-      this.logger.error(`Erro ao enviar ação de digitação: ${error.message}`);
+      this.logger.error(`Error sending typing action: ${error.message}`);
     }
   }
 
@@ -72,27 +73,25 @@ export class TelegramService {
     try {
       return await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'MarkdownV2',
-        // @ts-ignore
         disable_web_page_preview: true,
-      });
+      } as any);
     } catch (markdownError) {
       this.logger.warn(
-        `Falha no MarkdownV2 (${markdownError.message}), tentando HTML...`,
+        `MarkdownV2 failed (${markdownError.message}), trying HTML...`,
       );
 
       try {
         const htmlMessage = message
-          .replace(/\\([_*\[\]()~`>#+\-=|{}.!:-])/g, '$1') // Remove escapes
+          .replace(/\\([_*\[\]()~`>#+\-=|{}.!:-])/g, '$1')
           .replace(/\n/g, '<br>');
 
         return await this.bot.telegram.sendMessage(chatId, htmlMessage, {
           parse_mode: 'HTML',
-          // @ts-ignore
           disable_web_page_preview: true,
-        });
+        } as any);
       } catch (htmlError) {
         this.logger.warn(
-          `Falha no HTML (${htmlError.message}), tentando texto simples...`,
+          `HTML failed (${htmlError.message}), trying plain text...`,
         );
 
         try {
@@ -102,11 +101,10 @@ export class TelegramService {
             .replace(/_/g, '');
 
           return await this.bot.telegram.sendMessage(chatId, plainMessage, {
-            // @ts-ignore
             disable_web_page_preview: true,
-          });
+          } as any);
         } catch (finalError) {
-          this.logger.error(`Erro ao enviar mensagem: ${finalError.message}`);
+          this.logger.error(`Error sending message: ${finalError.message}`);
           throw finalError;
         }
       }
@@ -122,11 +120,10 @@ export class TelegramService {
       return await this.bot.telegram.answerCbQuery(
         callbackQueryId,
         text,
-        // @ts-ignore
         showAlert,
       );
     } catch (error) {
-      this.logger.error(`Erro ao responder callback query: ${error.message}`);
+      this.logger.error(`Error responding to callback query: ${error.message}`);
       throw error;
     }
   }
@@ -135,7 +132,7 @@ export class TelegramService {
     try {
       return await this.bot.telegram.deleteMessage(chatId, messageId);
     } catch (error) {
-      this.logger.error(`Erro ao deletar mensagem: ${error.message}`);
+      this.logger.error(`Error deleting message: ${error.message}`);
       throw error;
     }
   }

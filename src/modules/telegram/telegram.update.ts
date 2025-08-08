@@ -1,18 +1,12 @@
-// src/modules/telegram/telegram.update.ts
 import { Update, Ctx, Start, On, Command } from 'nestjs-telegraf';
+//@ts-ignore
 import { Context } from 'telegraf';
 import { Injectable, Logger } from '@nestjs/common';
 
 import { TelegramService } from './telegram.service';
 import { WeatherMessageService } from '../weather-messages/weather-messages.service';
 import { I18nService } from './i18n/i18n';
-
-interface UserSession {
-  chatId: number;
-  location?: string;
-  selectedLanguage?: string;
-  waitingForLanguage?: boolean;
-}
+import { UserSession } from './types';
 
 @Update()
 @Injectable()
@@ -20,7 +14,6 @@ export class TelegramUpdate {
   private readonly logger = new Logger(TelegramUpdate.name);
   private userSessions = new Map<number, UserSession>();
 
-  // Mapeamento de idiomas com emojis e códigos ISO
   private readonly languages = {
     '🇧🇷 Português': 'pt',
     '🇺🇸 English': 'en',
@@ -40,10 +33,13 @@ export class TelegramUpdate {
 
   @Start()
   async start(@Ctx() ctx: Context) {
-    // @ts-ignore
+    if (!ctx.chat) {
+      this.logger.error('No chat context available');
+      return;
+    }
+
     const chatId = ctx.chat.id;
 
-    // Limpa sessão anterior se existir
     this.userSessions.delete(chatId);
 
     const welcomeMessage = [
@@ -80,7 +76,11 @@ export class TelegramUpdate {
 
   @Command('cancel')
   async cancel(@Ctx() ctx: Context) {
-    // @ts-ignore
+    if (!ctx.chat) {
+      this.logger.error('No chat context available');
+      return;
+    }
+
     const chatId = ctx.chat.id;
 
     this.userSessions.delete(chatId);
@@ -89,31 +89,37 @@ export class TelegramUpdate {
 
   @On('text')
   async handleMessage(@Ctx() ctx: Context) {
+    if (!ctx.message) {
+      this.logger.error('No message context available');
+      return;
+    }
+
     const message = ctx.message;
-    // @ts-ignore
+
     if (!('text' in message)) {
       await ctx.reply(I18nService.t('ERROR_TEXT_ONLY', 'en'));
       return;
     }
 
+    if (!ctx.chat) {
+      this.logger.error('No chat context available');
+      return;
+    }
+
     const userText = message.text.trim();
-    // @ts-ignore
     const chatId = ctx.chat.id;
 
-    // Ignora comandos que começam com /
     if (userText.startsWith('/')) {
       return;
     }
 
     let session = this.userSessions.get(chatId);
 
-    // Se o usuário está aguardando seleção de idioma
     if (session?.waitingForLanguage) {
       await this.handleLanguageSelection(ctx, userText, chatId);
       return;
     }
 
-    // Nova solicitação de cidade
     await this.handleLocationRequest(ctx, userText, chatId);
   }
 
@@ -122,9 +128,8 @@ export class TelegramUpdate {
     location: string,
     chatId: number,
   ) {
-    this.logger.log(`Nova solicitação de clima para: ${location}`);
+    this.logger.log(`New weather request for: ${location}`);
 
-    // Criar ou atualizar sessão
     const session: UserSession = {
       chatId,
       location,
@@ -132,7 +137,6 @@ export class TelegramUpdate {
     };
     this.userSessions.set(chatId, session);
 
-    // Criar teclado inline com opções de idioma
     const languageButtons = Object.keys(this.languages).map((lang) => [
       { text: lang, callback_data: `lang_${this.languages[lang]}` },
     ]);
@@ -152,8 +156,7 @@ export class TelegramUpdate {
         reply_markup: keyboard,
       });
     } catch (error) {
-      // Fallback para texto simples se o inline keyboard falhar
-      this.logger.warn('Falha no inline keyboard, usando fallback text');
+      this.logger.warn('Inline keyboard failed, using fallback text');
 
       let fallbackMessage =
         I18nService.t('LANGUAGE_FALLBACK_MESSAGE', 'en', { location }) + '\n\n';
@@ -181,7 +184,6 @@ export class TelegramUpdate {
 
     let selectedLanguageCode: string | null = null;
 
-    // Verificar se é uma seleção por número (fallback)
     const numberMatch = input.match(/^([1-9])$/);
     if (numberMatch) {
       const index = parseInt(numberMatch[1]) - 1;
@@ -190,7 +192,6 @@ export class TelegramUpdate {
         selectedLanguageCode = languages[index];
       }
     } else {
-      // Verificar se o texto corresponde a um idioma
       const matchedLanguage = Object.keys(this.languages).find(
         (lang) =>
           lang.toLowerCase().includes(input.toLowerCase()) ||
@@ -207,17 +208,23 @@ export class TelegramUpdate {
       return;
     }
 
-    // Atualizar sessão
     session.selectedLanguage = selectedLanguageCode;
     session.waitingForLanguage = false;
 
-    // Buscar dados do tempo
     await this.fetchAndSendWeatherData(ctx, session);
   }
 
-  // Handler para callback queries (inline buttons)
   @On('callback_query')
   async handleCallbackQuery(@Ctx() ctx: any) {
+    if (
+      !ctx.callbackQuery ||
+      !ctx.callbackQuery.data ||
+      !ctx.callbackQuery.message?.chat?.id
+    ) {
+      this.logger.error('Invalid callback query context');
+      return;
+    }
+
     const callbackData = ctx.callbackQuery.data;
     const chatId = ctx.callbackQuery.message.chat.id;
 
@@ -230,20 +237,16 @@ export class TelegramUpdate {
         return;
       }
 
-      // Obter nome do idioma para exibição
       const languageName = I18nService.getLanguageDisplayName(languageCode);
 
-      // Confirmar seleção com tradução
       await ctx.answerCbQuery(
         I18nService.t('LANGUAGE_SELECTED', languageCode, {
           language: languageName,
         }),
       );
-      // Atualizar sessão
       session.selectedLanguage = languageCode;
       session.waitingForLanguage = false;
 
-      // Buscar dados do tempo
       await this.fetchAndSendWeatherData(ctx, session);
     }
   }
@@ -254,11 +257,10 @@ export class TelegramUpdate {
     try {
       await this.telegramService.sendTypingAction(chatId);
 
-      // Limpar sessão pois vamos processar
       this.userSessions.delete(chatId);
 
       this.logger.log(
-        `Buscando clima para ${location} no idioma ${selectedLanguage}`,
+        `Searching weather for ${location} in language ${selectedLanguage}`,
       );
 
       const weatherData = await this.weatherMessageService.getWeatherSummary(
@@ -274,15 +276,13 @@ export class TelegramUpdate {
         formattedMessage,
       );
 
-      // Mensagem de follow-up
       await ctx.reply(
         I18nService.t('NEW_CONSULTATION_TIP', selectedLanguage!),
         { parse_mode: 'Markdown' },
       );
     } catch (error) {
-      this.logger.error(`Erro ao processar clima para ${location}:`, error);
+      this.logger.error(`Error processing weather for ${location}:`, error);
 
-      // Limpar sessão mesmo em caso de erro
       this.userSessions.delete(chatId);
 
       let errorMessage = I18nService.t(
@@ -323,7 +323,6 @@ export class TelegramUpdate {
     const currentData = weatherData.currentData || {};
     const dateTime = weatherData.dateTime || {};
 
-    // Dados principais com tratamento para valores indefinidos
     const tempCelsius =
       currentData.temperature?.celsius !== undefined
         ? Math.round(currentData.temperature.celsius)
@@ -373,20 +372,17 @@ export class TelegramUpdate {
 
     const description = currentData.weather?.description
       ? escapeMarkdown(currentData.weather.description)
-      : 'Sem descrição';
+      : 'No description';
 
-    // Classificações humanizadas
     const classifications = weatherData.classifications || {};
     const tempClass = classifications.temperature || 'N/A';
     const humidityClass = classifications.humidity || 'N/A';
     const windClass = classifications.windSpeed || 'N/A';
     const uvClass = classifications.uvIndex || 'N/A';
 
-    // Construção da mensagem estilo assistente
     let message =
       I18nService.t('WEATHER_FORECAST_FOR', lang, { location }) + '\n';
     message += `📅 ${escapeMarkdown(dateTime.date)} \\| ⏰ ${escapeMarkdown(dateTime.time)}\n\n`;
-    // Resumo principal (destaque)
     if (weatherData.summary) {
       const safeSummary = weatherData.summary
         .replace(/(\d+)-(\d+)/g, '$1\\-$2')

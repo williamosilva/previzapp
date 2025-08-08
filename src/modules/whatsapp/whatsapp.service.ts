@@ -7,11 +7,7 @@ import {
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import * as qrcode from 'qrcode-terminal';
 import { WeatherMessageService } from '../weather-messages/weather-messages.service';
-
-interface UserSession {
-  phoneNumber: string;
-  isWaitingForLocation?: boolean;
-}
+import { UserSession } from './types';
 
 @Injectable()
 export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
@@ -51,25 +47,25 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('qr', (qr) => {
-      this.logger.log('QR Code recebido! Escaneie com seu WhatsApp:');
+      this.logger.log('QR Code received! Scan with your WhatsApp:');
       qrcode.generate(qr, { small: true });
     });
 
     this.client.on('ready', () => {
-      this.logger.log('WhatsApp Client está pronto!');
+      this.logger.log('WhatsApp Client is ready!');
       this.isReady = true;
     });
 
     this.client.on('authenticated', () => {
-      this.logger.log('WhatsApp autenticado com sucesso!');
+      this.logger.log('WhatsApp authenticated successfully!');
     });
 
     this.client.on('auth_failure', (msg) => {
-      this.logger.error('Falha na autenticação:', msg);
+      this.logger.error('Authentication failed:', msg);
     });
 
     this.client.on('disconnected', (reason) => {
-      this.logger.warn('WhatsApp desconectado:', reason);
+      this.logger.warn('WhatsApp disconnected:', reason);
       this.isReady = false;
     });
 
@@ -84,7 +80,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.client.initialize();
     } catch (error) {
-      this.logger.error('Erro ao inicializar WhatsApp Client:', error);
+      this.logger.error('Error initializing WhatsApp Client:', error);
       throw error;
     }
   }
@@ -93,7 +89,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     const phoneNumber = message.from;
     const messageBody = message.body.trim();
 
-    this.logger.log(`Mensagem recebida de ${phoneNumber}: ${messageBody}`);
+    this.logger.log(`Message received from ${phoneNumber}: ${messageBody}`);
 
     if (
       messageBody.toLowerCase().startsWith('/start') ||
@@ -181,7 +177,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async handleLocationRequest(phoneNumber: string, location: string) {
-    this.logger.log(`Processando consulta de tempo para: ${location}`);
+    this.logger.log(`Processing time query for: ${location}`);
 
     try {
       await this.sendTypingIndicator(phoneNumber);
@@ -209,7 +205,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         );
       }, 2000);
     } catch (error) {
-      this.logger.error(`Erro ao processar clima para ${location}:`, error);
+      this.logger.error(`Error processing weather for ${location}:`, error);
 
       this.userSessions.delete(phoneNumber);
 
@@ -325,15 +321,15 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
   private async sendMessage(phoneNumber: string, message: string) {
     if (!this.isReady) {
-      this.logger.warn('WhatsApp client não está pronto');
+      this.logger.warn('WhatsApp client is not ready');
       return;
     }
 
     try {
       await this.client.sendMessage(phoneNumber, message);
-      this.logger.log(`Mensagem enviada para ${phoneNumber}`);
+      this.logger.log(`Message sent to ${phoneNumber}`);
     } catch (error) {
-      this.logger.error(`Erro ao enviar mensagem para ${phoneNumber}:`, error);
+      this.logger.error(`Error sending message to ${phoneNumber}:`, error);
       throw error;
     }
   }
@@ -345,7 +341,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       const chat = await this.client.getChatById(phoneNumber);
       await chat.sendStateTyping();
     } catch (error) {
-      this.logger.warn(`Erro ao enviar indicador de digitação:`, error);
+      this.logger.warn(`Error sending typing indicator:`, error);
     }
   }
 
@@ -364,7 +360,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         pushname: info?.pushname,
       };
     } catch (error) {
-      this.logger.error('Erro ao obter informações do client:', error);
+      this.logger.error('Error getting client information:', error);
       return null;
     }
   }
