@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Serviço para desenvolvimento
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: previzapp-dev
+    ports:
+      - '3000:3000'
+    volumes:
+      # Volume para hot reload
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+    profiles:
+      - dev
+    restart: unless-stopped
+
+  # Serviço para produção
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: previzapp-prod
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    networks:
+      - app-network
+    profiles:
+      - prod
+    restart: unless-stopped
+    # Configurações de recursos para produção
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  node_modules:
