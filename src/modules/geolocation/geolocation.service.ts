@@ -57,7 +57,7 @@ export class GeolocationService {
 
   // Função principal com cache obrigatório
   async getCoordinatesFromAddress(address: string) {
-    this.logger.debug(`Recebendo endereço para geocodificação: "${address}"`);
+    // this.logger.debug(`Recebendo endereço para geocodificação: "${address}"`);
 
     // Limpar cache expirado periodicamente
     if (Math.random() < 0.1) {
@@ -84,7 +84,7 @@ export class GeolocationService {
       }
 
       const res = await this.geocoder.geocode(address);
-      this.logger.debug(`Resultado bruto do geocoder: ${JSON.stringify(res)}`);
+      // this.logger.debug(`Resultado bruto do geocoder: ${JSON.stringify(res)}`);
 
       if (res.length === 0) {
         this.logger.warn(`Endereço não encontrado: "${address}"`);
@@ -104,10 +104,10 @@ export class GeolocationService {
         timestamp: Date.now(),
       });
 
-      this.logger.log(
-        `Coordenadas encontradas para "${result.address}": ` +
-          `Lat: ${result.latitude}, Lng: ${result.longitude}`,
-      );
+      // this.logger.log(
+      //   `Coordenadas encontradas para "${result.address}": ` +
+      //     `Lat: ${result.latitude}, Lng: ${result.longitude}`,
+      // );
 
       return result;
     } catch (error) {

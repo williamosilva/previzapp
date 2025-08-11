@@ -259,9 +259,9 @@ export class TelegramUpdate {
 
       this.userSessions.delete(chatId);
 
-      this.logger.log(
-        `Searching weather for ${location} in language ${selectedLanguage}`,
-      );
+      // this.logger.log(
+      //   `Searching weather for ${location} in language ${selectedLanguage}`,
+      // );
 
       const weatherData = await this.weatherMessageService.getWeatherSummary(
         location!,

@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Serviço de desenvolvimento
   app-dev:
     build:
       context: .
@@ -20,9 +19,8 @@ services:
       - PORT=${PORT:-3000}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     volumes:
-      # Volume apenas para o código fonte (live reload)
+   
       - ./src:/app/src:ro
-      # Volumes para dados persistentes (criados pelo container)
       - whatsapp_sessions:/app/.wwebjs_auth
       - whatsapp_cache:/app/.wwebjs_cache
       - app_logs:/app/logs
@@ -31,14 +29,12 @@ services:
     restart: unless-stopped
     profiles:
       - dev
-    # Configurações específicas para WhatsApp Web.js
     security_opt:
       - seccomp:unconfined
     shm_size: 2gb
     cap_add:
       - SYS_ADMIN
 
-  # Serviço de produção
   app-prod:
     build:
       context: .
@@ -57,7 +53,6 @@ services:
       - PORT=${PORT:-3000}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     volumes:
-      # Volumes para dados persistentes (criados pelo container)
       - whatsapp_sessions:/app/.wwebjs_auth
       - whatsapp_cache:/app/.wwebjs_cache
       - app_logs:/app/logs
@@ -66,7 +61,6 @@ services:
     restart: unless-stopped
     profiles:
       - prod
-    # Configurações específicas para WhatsApp Web.js
     security_opt:
       - seccomp:unconfined
     shm_size: 2gb

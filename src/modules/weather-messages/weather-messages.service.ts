@@ -22,7 +22,7 @@ export class WeatherMessageService {
     address: string,
     lang: string,
   ): Promise<WeatherResponse> {
-    console.log(`Obtendo dados do tempo para: ${address} no idioma: ${lang}`);
+
     const coordinates =
       await this.geolocationService.getCoordinatesFromAddress(address);
     const latitude = coordinates.latitude;
