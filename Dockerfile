@@ -1,35 +1,35 @@
-# Multi-stage build
-FROM node:18-alpine AS base
+# Usar uma imagem base com suporte ao Puppeteer/Chrome
+FROM node:18-bullseye-slim as base
 
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    && rm -rf /var/cache/apk/*
-
-# Configurar Puppeteer para usar o Chromium instalado
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Instalar dependências necessárias para o Puppeteer/Chrome
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+      --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 # Criar diretório da aplicação
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copiar arquivos de dependências
+# Stage de desenvolvimento
+FROM base as development
+
+# Copiar TODOS os arquivos de configuração ANTES de instalar dependências
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 COPY package*.json ./
 
-# Stage para desenvolvimento
-FROM base AS development
-
-# Instalar todas as dependências (incluindo devDependencies)
-RUN npm ci
+# Instalar dependências
+RUN npm install
 
 # Copiar código fonte
-COPY . .
+COPY src ./src
+
+# Criar diretórios necessários dentro do container
+RUN mkdir -p .wwebjs_auth .wwebjs_cache logs
 
 # Expor porta
 EXPOSE 3000
@@ -37,59 +37,47 @@ EXPOSE 3000
 # Comando para desenvolvimento
 CMD ["npm", "run", "start:dev"]
 
-# Stage para build
-FROM base AS build
+# Stage de build
+FROM base as build
 
-# Instalar todas as dependências
-RUN npm ci
-
-# Copiar código fonte
-COPY . .
-
-# Build da aplicação
-RUN npm run build
-
-# Stage para produção
-FROM node:18-alpine AS production
-
-# Instalar dependências do sistema para produção
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    && rm -rf /var/cache/apk/*
-
-# Configurar Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production
-
-# Criar usuário não-root para segurança
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
-
-# Criar diretório da aplicação
-WORKDIR /usr/src/app
-
-# Copiar arquivos de dependências
+# Copiar TODOS os arquivos de configuração ANTES de instalar dependências
+COPY tsconfig*.json ./
+COPY nest-cli.json ./
 COPY package*.json ./
 
+# Instalar dependências
+RUN npm install
+
+# Copiar código fonte
+COPY src ./src
+
+# Fazer build da aplicação
+RUN npm run build
+
+# Stage de produção
+FROM base as production
+
+# Variáveis de ambiente para o Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
 # Instalar apenas dependências de produção
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
-# Copiar código compilado do stage de build
-COPY --from=build /usr/src/app/dist ./dist
+# Copiar build da aplicação
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
 
-# Mudar propriedade dos arquivos para o usuário nestjs
-RUN chown -R nestjs:nodejs /usr/src/app
-USER nestjs
+# Criar diretórios necessários dentro do container
+RUN mkdir -p .wwebjs_auth .wwebjs_cache logs
+
+# Criar usuário não-root para segurança
+RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
+RUN chown -R appuser:appuser /app
+USER appuser
 
 # Expor porta
 EXPOSE 3000
 
 # Comando para produção
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:prod"]

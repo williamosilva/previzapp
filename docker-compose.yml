@@ -1,58 +1,91 @@
 version: '3.8'
 
 services:
-  # Serviço para desenvolvimento
+  # Serviço de desenvolvimento
   app-dev:
     build:
       context: .
-      dockerfile: Dockerfile
       target: development
-    container_name: previzapp-dev
+    container_name: previzapp_dev
     ports:
       - '3000:3000'
-    volumes:
-      # Volume para hot reload
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    env_file:
-      - .env
     environment:
       - NODE_ENV=development
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-5000}
+      - HTTP_MAX_REDIRECTS=${HTTP_MAX_REDIRECTS:-5}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}
+      - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
+      - PORT=${PORT:-3000}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    volumes:
+      # Volume apenas para o código fonte (live reload)
+      - ./src:/app/src:ro
+      # Volumes para dados persistentes (criados pelo container)
+      - whatsapp_sessions:/app/.wwebjs_auth
+      - whatsapp_cache:/app/.wwebjs_cache
+      - app_logs:/app/logs
     networks:
       - app-network
+    restart: unless-stopped
     profiles:
       - dev
-    restart: unless-stopped
+    # Configurações específicas para WhatsApp Web.js
+    security_opt:
+      - seccomp:unconfined
+    shm_size: 2gb
+    cap_add:
+      - SYS_ADMIN
 
-  # Serviço para produção
+  # Serviço de produção
   app-prod:
     build:
       context: .
-      dockerfile: Dockerfile
       target: production
-    container_name: previzapp-prod
+    container_name: previzapp_prod
     ports:
       - '3000:3000'
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
+      - HTTP_TIMEOUT=${HTTP_TIMEOUT:-5000}
+      - HTTP_MAX_REDIRECTS=${HTTP_MAX_REDIRECTS:-5}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - GOOGLE_CLIENT_EMAIL=${GOOGLE_CLIENT_EMAIL}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}
+      - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
+      - PORT=${PORT:-3000}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    volumes:
+      # Volumes para dados persistentes (criados pelo container)
+      - whatsapp_sessions:/app/.wwebjs_auth
+      - whatsapp_cache:/app/.wwebjs_cache
+      - app_logs:/app/logs
     networks:
       - app-network
+    restart: unless-stopped
     profiles:
       - prod
-    restart: unless-stopped
-    # Configurações de recursos para produção
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
+    # Configurações específicas para WhatsApp Web.js
+    security_opt:
+      - seccomp:unconfined
+    shm_size: 2gb
+    cap_add:
+      - SYS_ADMIN
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  whatsapp_sessions:
+    driver: local
+  whatsapp_cache:
+    driver: local
+  app_logs:
+    driver: local
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  node_modules:

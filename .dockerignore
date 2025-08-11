@@ -1,75 +1,31 @@
-# Dependências
 node_modules
-npm-debug.log*
-
-# Arquivos de build
+npm-debug.log
 dist
-build
-
-# Arquivos de ambiente (serão copiados separadamente)
+coverage
+.nyc_output
+.git
+.gitignore
+README.md
 .env
 .env.local
-.env.development
-.env.production
-
-# Logs
+.env.development.local
+.env.test.local
+.env.production.local
+.wwebjs_auth
+.wwebjs_cache
 logs
+.DS_Store
 *.log
-
-# Runtime data
-pids
 *.pid
 *.seed
 *.pid.lock
-
-# Coverage
-coverage
-*.lcov
-
-# Arquivos temporários
-.tmp
-.temp
-
-# Editor directories and files
+.npm
+.nyc_output
+.eslintcache
 .vscode
 .idea
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Git
-.git
-.gitignore
-
-# Docker
-Dockerfile*
-docker-compose*
+*.tgz
+*.tar.gz
+Dockerfile
+docker-compose.yml
 .dockerignore
-
-# README
-README.md
-
-# Jest
-jest.config.js
-
-# ESLint
-.eslintrc*
-
-# Prettier
-.prettierrc*
-
-# TypeScript
-tsconfig*.json
-
-# Tests
-test/
-**/*.spec.ts
-**/*.test.ts
-
-# WhatsApp session data (se houver)
-.wwebjs_auth/
-.wwebjs_cache/
