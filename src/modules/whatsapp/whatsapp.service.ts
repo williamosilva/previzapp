@@ -4,6 +4,7 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import * as qrcode from 'qrcode-terminal';
 import { WeatherMessageService } from '../weather-messages/weather-messages.service';
@@ -15,11 +16,27 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   private client: Client;
   private userSessions = new Map<string, UserSession>();
   private isReady = false;
+  private isEnabled = false;
 
-  constructor(private readonly weatherMessageService: WeatherMessageService) {}
+  constructor(
+    private readonly weatherMessageService: WeatherMessageService,
+    private readonly configService: ConfigService,
+  ) {
+
+    this.isEnabled = this.configService.get<string>('ENABLE_WHATSAPP') === 'true';
+  }
 
   async onModuleInit() {
-    await this.initializeClient();
+    if (!this.isEnabled) {
+      this.logger.log('WhatsApp module is disabled by configuration');
+      return;
+    }
+    
+    try {
+      await this.initializeClient();
+    } catch (error) {
+      this.logger.error('WhatsApp initialization failed, continuing without WhatsApp support:', error);
+    }
   }
 
   async onModuleDestroy() {
@@ -29,6 +46,8 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async initializeClient() {
+    if (!this.isEnabled) return;
+
     this.client = new Client({
       authStrategy: new LocalAuth(),
       puppeteer: {
@@ -71,9 +90,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
     this.client.on('message_create', async (message) => {
       if (message.fromMe) return;
-
       if (message.type !== 'chat') return;
-
       await this.handleMessage(message);
     });
 
@@ -85,7 +102,10 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  // Resto dos métodos permanecem iguais, mas adicione verificações onde necessário
   private async handleMessage(message: any) {
+    if (!this.isEnabled || !this.isReady) return;
+    
     const phoneNumber = message.from;
     const messageBody = message.body.trim();
 
@@ -118,6 +138,30 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     await this.handleLocationRequest(phoneNumber, messageBody);
   }
 
+  private async sendMessage(phoneNumber: string, message: string) {
+    if (!this.isEnabled || !this.isReady) {
+      this.logger.warn('WhatsApp client is not ready or disabled');
+      return;
+    }
+
+    try {
+      await this.client.sendMessage(phoneNumber, message);
+      this.logger.log(`Message sent to ${phoneNumber}`);
+    } catch (error) {
+      this.logger.error(`Error sending message to ${phoneNumber}:`, error);
+      throw error;
+    }
+  }
+
+  public isClientReady(): boolean {
+    return this.isEnabled && this.isReady;
+  }
+
+  public isWhatsAppEnabled(): boolean {
+    return this.isEnabled;
+  }
+
+  // ... resto dos métodos privados permanecem iguais
   private async sendWelcomeMessage(phoneNumber: string) {
     const welcomeMessage = [
       '🌤️ *Olá! Eu sou seu assistente meteorológico!*',
@@ -319,23 +363,8 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     return message;
   }
 
-  private async sendMessage(phoneNumber: string, message: string) {
-    if (!this.isReady) {
-      this.logger.warn('WhatsApp client is not ready');
-      return;
-    }
-
-    try {
-      await this.client.sendMessage(phoneNumber, message);
-      this.logger.log(`Message sent to ${phoneNumber}`);
-    } catch (error) {
-      this.logger.error(`Error sending message to ${phoneNumber}:`, error);
-      throw error;
-    }
-  }
-
   private async sendTypingIndicator(phoneNumber: string) {
-    if (!this.isReady) return;
+    if (!this.isEnabled || !this.isReady) return;
 
     try {
       const chat = await this.client.getChatById(phoneNumber);
@@ -345,17 +374,14 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  public isClientReady(): boolean {
-    return this.isReady;
-  }
-
   public async getClientInfo() {
-    if (!this.isReady) return null;
+    if (!this.isEnabled || !this.isReady) return null;
 
     try {
       const info = this.client.info;
       return {
         isReady: this.isReady,
+        isEnabled: this.isEnabled,
         phoneNumber: info?.wid?.user,
         pushname: info?.pushname,
       };

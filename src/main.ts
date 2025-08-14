@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
-    console.log('🚀 Iniciando aplicação NestJS...');
+    
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('PORT:', process.env.PORT);
     
@@ -18,14 +18,14 @@ async function bootstrap() {
     const port = process.env.PORT || 3000;
     
     await app.listen(port, '0.0.0.0');
-    console.log(`✅ Aplicação rodando na porta ${port}`);
+
   } catch (error) {
-    console.error('❌ Erro ao iniciar aplicação:', error);
+console.error('❌ Error starting application:', error);
     process.exit(1);
   }
 }
 
 bootstrap().catch(error => {
-  console.error('❌ Erro fatal:', error);
+console.error('❌ Fatal error:', error);
   process.exit(1);
 });
