@@ -137,6 +137,7 @@ export class GeolocationService {
         throw new HttpException(
           'Geocoding service temporarily blocked. Please try again later.',
           HttpStatus.TOO_MANY_REQUESTS,
+          { cause: error },
         );
       }
 
