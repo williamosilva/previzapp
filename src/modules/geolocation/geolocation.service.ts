@@ -5,7 +5,7 @@ export class GeolocationService {
   private readonly logger = new Logger(GeolocationService.name);
   private geocoder;
   private lastRequestTime = 0;
-  private readonly MIN_REQUEST_INTERVAL = 1100; // 1.1 segundos para margem de segurança
+  private readonly MIN_REQUEST_INTERVAL = 2000; // Aumentado para 2s em produção
 
   // Cache simples em memória com TTL
   private cache = new Map<string, { data: any; timestamp: number }>();
@@ -15,30 +15,54 @@ export class GeolocationService {
     const NodeGeocoder = require('node-geocoder');
 
     this.logger.log('Inicializando geocoder com provider OpenStreetMap...');
+
+    // Detectar ambiente
+    const isProduction = process.env.NODE_ENV === 'production';
+
     this.geocoder = NodeGeocoder({
       provider: 'openstreetmap',
       httpAdapter: 'https',
       formatter: null,
       extra: {
-        // User-Agent mais detalhado conforme política do Nominatim
-        'user-agent':
-          'PrevizApp/1.0 (https://williamsilva.dev/; williamsilva20062005@gmail.com)',
-        // Referer correto
-        referer: 'https://williamsilva.dev/',
+        // User-Agent mais "humano" e específico
+        'User-Agent':
+          'Mozilla/5.0 (compatible; PrevizWeatherApp/1.0; +https://williamsilva.dev/contact)',
+        // Headers adicionais para parecer mais legítimo
+        Accept: 'application/json, text/html, */*',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        DNT: '1',
+        Connection: 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        // Referer mais específico
+        Referer: 'https://williamsilva.dev/',
+        // Header customizado para identificação
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      // Timeout para evitar requests longos
-      timeout: 10000,
+      // Timeout aumentado para produção
+      timeout: isProduction ? 15000 : 10000,
+      // Rate limit mais conservador em produção
+      rateLimit: isProduction ? 2000 : 1100,
     });
   }
 
-  // Rate limiting aprimorado
-  private async enforceRateLimit() {
+  // Rate limiting aprimorado com backoff exponencial
+  private async enforceRateLimit(attempt = 1) {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
 
-    if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
-      const waitTime = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
-      this.logger.debug(`Aguardando ${waitTime}ms para respeitar rate limit`);
+    // Intervalo base aumentado em produção
+    const baseInterval =
+      process.env.NODE_ENV === 'production' ? this.MIN_REQUEST_INTERVAL : 1100;
+
+    // Backoff exponencial para múltiplas tentativas
+    const interval = baseInterval * Math.pow(1.5, attempt - 1);
+
+    if (timeSinceLastRequest < interval) {
+      const waitTime = interval - timeSinceLastRequest;
+      this.logger.debug(
+        `Aguardando ${waitTime}ms para respeitar rate limit (tentativa ${attempt})`,
+      );
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
 
@@ -48,163 +72,258 @@ export class GeolocationService {
   // Limpeza periódica do cache
   private cleanExpiredCache() {
     const now = Date.now();
+    let cleaned = 0;
     for (const [key, value] of this.cache.entries()) {
       if (now - value.timestamp > this.CACHE_TTL) {
         this.cache.delete(key);
+        cleaned++;
       }
+    }
+    if (cleaned > 0) {
+      this.logger.debug(`Cache limpo: ${cleaned} entradas expiradas removidas`);
     }
   }
 
-  // Função principal com cache obrigatório
-  async getCoordinatesFromAddress(address: string) {
-    // this.logger.debug(`Recebendo endereço para geocodificação: "${address}"`);
+  // Normalizar endereço para melhor cache
+  private normalizeAddress(address: string): string {
+    return address
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ') // Múltiplos espaços -> um espaço
+      .replace(/[^\w\s\-,]/g, ''); // Remove caracteres especiais exceto hífen e vírgula
+  }
+
+  // Função principal com retry e cache obrigatório
+  async getCoordinatesFromAddress(address: string, maxRetries = 3) {
+    this.logger.debug(`Geocodificando: "${address}"`);
 
     // Limpar cache expirado periodicamente
     if (Math.random() < 0.1) {
-      // 10% de chance a cada chamada
       this.cleanExpiredCache();
     }
 
-    const cacheKey = address.toLowerCase().trim();
+    const cacheKey = this.normalizeAddress(address);
     const cached = this.cache.get(cacheKey);
 
     // Verificar cache primeiro (obrigatório para conformidade)
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-      this.logger.debug(`Coordenadas encontradas no cache para: "${address}"`);
+      this.logger.debug(`✅ Cache hit para: "${address}"`);
       return cached.data;
     }
 
-    try {
-      // Aplicar rate limiting rigoroso
-      await this.enforceRateLimit();
+    // Validar entrada
+    if (!address || address.trim().length < 2) {
+      throw new HttpException('Endereço muito curto', HttpStatus.BAD_REQUEST);
+    }
 
-      // Validar entrada
-      if (!address || address.trim().length < 2) {
-        throw new HttpException('Address too short', HttpStatus.BAD_REQUEST);
-      }
+    let lastError: any;
 
-      const res = await this.geocoder.geocode(address);
-      // this.logger.debug(`Resultado bruto do geocoder: ${JSON.stringify(res)}`);
+    // Loop de retry com backoff exponencial
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Aplicar rate limiting com backoff
+        await this.enforceRateLimit(attempt);
 
-      if (res.length === 0) {
-        this.logger.warn(`Endereço não encontrado: "${address}"`);
-        throw new HttpException('Location not found', HttpStatus.NOT_FOUND);
-      }
+        this.logger.debug(
+          `Tentativa ${attempt}/${maxRetries} para: "${address}"`,
+        );
 
-      const result = {
-        latitude: res[0].latitude,
-        longitude: res[0].longitude,
-        address: res[0].formattedAddress?.split(',')[0]?.trim() || address,
-        fullAddress: res[0].formattedAddress,
-      };
+        const res = await this.geocoder.geocode(address);
 
-      // Cache OBRIGATÓRIO - conforme política do Nominatim
-      this.cache.set(cacheKey, {
-        data: result,
-        timestamp: Date.now(),
-      });
+        if (res.length === 0) {
+          this.logger.warn(`❌ Endereço não encontrado: "${address}"`);
+          throw new HttpException(
+            'Localização não encontrada',
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
-      // this.logger.log(
-      //   `Coordenadas encontradas para "${result.address}": ` +
-      //     `Lat: ${result.latitude}, Lng: ${result.longitude}`,
-      // );
+        const result = {
+          latitude: res[0].latitude,
+          longitude: res[0].longitude,
+          address: res[0].formattedAddress?.split(',')[0]?.trim() || address,
+          fullAddress: res[0].formattedAddress,
+          source: 'nominatim',
+          cached: false,
+        };
 
-      return result;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
+        // Cache OBRIGATÓRIO
+        this.cache.set(cacheKey, {
+          data: { ...result, cached: true },
+          timestamp: Date.now(),
+        });
 
-      this.logger.error(
-        `Erro ao buscar coordenadas para "${address}": ${error.message}`,
-      );
+        this.logger.log(
+          `✅ Coordenadas encontradas para "${result.address}": ` +
+            `${result.latitude}, ${result.longitude} (tentativa ${attempt})`,
+        );
 
-      // Tratamento específico para diferentes tipos de bloqueio
-      if (
-        error.message &&
-        (error.message.includes('Access blocked') ||
-          error.message.includes('blocked') ||
-          error.message.includes('usage policy'))
-      ) {
+        return result;
+      } catch (error) {
+        lastError = error;
+
+        if (error instanceof HttpException) {
+          // Não fazer retry para erros de validação
+          throw error;
+        }
+
+        // Log detalhado do erro
         this.logger.error(
-          `BLOQUEIO NOMINATIM: Possíveis causas:
-          1. Rate limit excedido (máx 1 req/s)
-          2. User-Agent inadequado
-          3. Falta de cache (requisições repetidas)
-          4. Uso em massa detectado
-          Aguarde algumas horas antes de tentar novamente.`,
+          `❌ Erro na tentativa ${attempt}/${maxRetries} para "${address}": ${error.message}`,
         );
-        throw new HttpException(
-          'Geocoding service temporarily blocked. Please try again later.',
-          HttpStatus.TOO_MANY_REQUESTS,
-          { cause: error },
-        );
-      }
 
-      // Outros erros de rede/timeout
-      if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
-        throw new HttpException(
-          'Geocoding service timeout. Please try again.',
-          HttpStatus.REQUEST_TIMEOUT,
-        );
+        // Tratamento específico para diferentes tipos de erro
+        if (this.isBlockedError(error)) {
+          const waitTime = Math.min(5000 * attempt, 30000); // Max 30s
+          this.logger.warn(
+            `🚫 Bloqueio detectado. Aguardando ${waitTime}ms antes da próxima tentativa...`,
+          );
+
+          if (attempt < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            continue;
+          }
+        }
+
+        // Para outros erros, aguardar menos tempo
+        if (attempt < maxRetries) {
+          const waitTime = 1000 * attempt;
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+        }
       }
+    }
+
+    // Se chegou aqui, todas as tentativas falharam
+    return this.handleFinalError(lastError, address);
+  }
+
+  private isBlockedError(error: any): boolean {
+    const message = error.message?.toLowerCase() || '';
+    return (
+      message.includes('blocked') ||
+      message.includes('forbidden') ||
+      message.includes('usage policy') ||
+      message.includes('too many requests') ||
+      message.includes('rate limit') ||
+      error.status === 403 ||
+      error.status === 429
+    );
+  }
+
+  private handleFinalError(error: any, address: string) {
+    if (this.isBlockedError(error)) {
+      this.logger.error(
+        `🚫 BLOQUEIO NOMINATIM PERSISTENTE para "${address}":
+        Possíveis causas:
+        1. IP do Heroku bloqueado
+        2. Rate limit excedido persistentemente  
+        3. User-Agent detectado como bot
+        4. Padrão de uso suspeito
+        
+        Soluções:
+        - Aguardar 24h
+        - Considerar proxy/VPN
+        - Migrar para Google Geocoding API
+        - Usar cache mais agressivo`,
+      );
 
       throw new HttpException(
-        `Geocoding error: ${error.message}`,
-        HttpStatus.SERVICE_UNAVAILABLE,
+        'Serviço de geocodificação temporariamente indisponível. Tente novamente mais tarde.',
+        HttpStatus.TOO_MANY_REQUESTS,
+        { cause: error },
       );
+    }
+
+    if (error.code === 'ETIMEDOUT' || error.code === 'ECONNRESET') {
+      throw new HttpException(
+        'Timeout no serviço de geocodificação. Tente novamente.',
+        HttpStatus.REQUEST_TIMEOUT,
+      );
+    }
+
+    throw new HttpException(
+      `Erro no serviço de geocodificação: ${error.message}`,
+      HttpStatus.SERVICE_UNAVAILABLE,
+    );
+  }
+
+  // Método para verificar saúde do serviço
+  async healthCheck(): Promise<{ status: string; details: any }> {
+    try {
+      // Teste com endereço conhecido (deve estar em cache)
+      await this.getCoordinatesFromAddress('São Paulo, SP, Brasil');
+
+      return {
+        status: 'healthy',
+        details: {
+          cacheSize: this.cache.size,
+          lastRequest: new Date(this.lastRequestTime).toISOString(),
+          environment: process.env.NODE_ENV,
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        details: {
+          error: error.message,
+          cacheSize: this.cache.size,
+          lastRequest: new Date(this.lastRequestTime).toISOString(),
+        },
+      };
     }
   }
 
   // Método para verificar status do cache
   getCacheStats() {
+    const now = Date.now();
+    const entries = Array.from(this.cache.entries()).map(([key, value]) => ({
+      key,
+      age: Math.round((now - value.timestamp) / 1000 / 60), // idade em minutos
+      expired: now - value.timestamp > this.CACHE_TTL,
+    }));
+
     return {
       size: this.cache.size,
-      entries: Array.from(this.cache.keys()),
+      entries,
+      totalEntries: entries.length,
+      expiredEntries: entries.filter((e) => e.expired).length,
+      environment: process.env.NODE_ENV,
     };
   }
 
-  // Método para limpar cache manualmente (útil para debug)
+  // Método para limpar cache manualmente
   clearCache() {
     this.cache.clear();
-    this.logger.log('Cache do geocoder limpo');
+    this.logger.log('🗑️ Cache do geocoder limpo');
   }
 
-  // Método para pré-aquecer cache com localizações comuns (opcional)
-  async warmupCache(commonAddresses: string[]) {
+  // Pré-aquecer cache com endereços comuns do Brasil
+  async warmupCache(commonAddresses?: string[]) {
+    const defaultAddresses = commonAddresses || [
+      'São Paulo, SP, Brasil',
+      'Rio de Janeiro, RJ, Brasil',
+      'Belo Horizonte, MG, Brasil',
+      'Brasília, DF, Brasil',
+      'Salvador, BA, Brasil',
+    ];
+
     this.logger.log(
-      `Pré-aquecendo cache com ${commonAddresses.length} endereços...`,
+      `🔥 Pré-aquecendo cache com ${defaultAddresses.length} endereços...`,
     );
 
-    for (const address of commonAddresses) {
+    for (const address of defaultAddresses) {
       try {
         await this.getCoordinatesFromAddress(address);
-        // Esperar mais tempo entre requests no warmup
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // Esperar tempo extra no warmup
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       } catch (error) {
-        this.logger.warn(`Falha no warmup para "${address}": ${error.message}`);
-        // Se houver erro, parar o warmup para não piorar a situação
-        break;
+        this.logger.warn(
+          `⚠️ Falha no warmup para "${address}": ${error.message}`,
+        );
+        // Continuar tentando outros endereços
       }
     }
+
+    this.logger.log('✅ Warmup do cache concluído');
   }
 }
-
-// Exemplo de uso no controller ou serviço que consome:
-/*
-@Controller('weather')
-export class WeatherController {
-  constructor(private geolocationService: GeolocationService) {}
-
-  @Get('cache-stats')
-  getCacheStats() {
-    return this.geolocationService.getCacheStats();
-  }
-
-  @Post('clear-cache')
-  clearCache() {
-    this.geolocationService.clearCache();
-    return { message: 'Cache cleared' };
-  }
-}
-*/
