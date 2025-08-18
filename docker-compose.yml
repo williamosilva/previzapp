@@ -19,8 +19,9 @@ services:
       - PORT=${PORT:-3000}
       - ENABLE_WHATSAPP=${ENABLE_WHATSAPP}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - ENABLE_TELEGRAM=${ENABLE_TELEGRAM}
+      - ENABLE_WHATSAPP=${ENABLE_WHATSAPP}
     volumes:
-   
       - ./src:/app/src:ro
       - whatsapp_sessions:/app/.wwebjs_auth
       - whatsapp_cache:/app/.wwebjs_cache
@@ -53,6 +54,8 @@ services:
       - GOOGLE_PROJECT_ID=${GOOGLE_PROJECT_ID}
       - PORT=${PORT:-3000}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - ENABLE_WHATSAPP=${ENABLE_WHATSAPP}
+      - ENABLE_TELEGRAM=${ENABLE_TELEGRAM}
     volumes:
       - whatsapp_sessions:/app/.wwebjs_auth
       - whatsapp_cache:/app/.wwebjs_cache
