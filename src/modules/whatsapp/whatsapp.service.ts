@@ -15,11 +15,10 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WhatsAppService.name);
   private client: Client;
   private userSessions = new Map<string, UserSession>();
-  private userInteractions = new Map<string, boolean>(); // Track first interaction
+  private userInteractions = new Map<string, boolean>();
   private isReady = false;
   private isEnabled = false;
 
-  // Palavras de saudação comuns
   private greetingWords = [
     'oi',
     'olá',
@@ -140,9 +139,8 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     const phoneNumber = message.from;
     const messageBody = message.body.trim();
 
-    this.logger.log(`Message received from ${phoneNumber}: ${messageBody}`);
+    // this.logger.log(`Message received from ${phoneNumber}: ${messageBody}`);
 
-    // Comandos específicos têm prioridade
     if (
       messageBody.toLowerCase().startsWith('/start') ||
       messageBody.toLowerCase() === 'start'
@@ -168,14 +166,12 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
-    // Verificar se é a primeira interação e se é uma saudação
     if (this.isFirstInteraction(phoneNumber) && this.isGreeting(messageBody)) {
       await this.sendGreetingResponse(phoneNumber);
       this.markUserAsInteracted(phoneNumber);
       return;
     }
 
-    // Marcar que o usuário já interagiu e processar como consulta meteorológica
     this.markUserAsInteracted(phoneNumber);
     await this.handleLocationRequest(phoneNumber, messageBody);
   }
@@ -189,18 +185,25 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   }
 
   private isGreeting(message: string): boolean {
-    const normalizedMessage = message
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '') // Remove pontuação
-      .trim();
+    const normalizedMessage = message.toLowerCase().replace(/[^\w\s]/g, '');
 
-    // Verifica se a mensagem contém apenas saudações (máximo 4 palavras)
     const words = normalizedMessage.split(/\s+/);
     if (words.length > 4) return false;
 
-    // Verifica se pelo menos uma palavra é uma saudação
     return this.greetingWords.some((greeting) => {
       return words.some((word) => word === greeting || word.includes(greeting));
+    });
+  }
+
+  private convertKelvinToCelsiusInText(text: string): string {
+    if (!text) return text;
+
+    const kelvinPattern = /(\d+(?:\.\d+)?)\s*K\b/gi;
+
+    return text.replace(kelvinPattern, (match, kelvinValue) => {
+      const kelvin = parseFloat(kelvinValue);
+      const celsius = Math.round(kelvin - 273.15);
+      return `${celsius}°C`;
     });
   }
 
@@ -208,7 +211,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     const greetingMessage = [
       '👋 *Olá! Que bom te conhecer!*',
       '',
-      '🌤️ Eu sou seu assistente meteorológico pessoal e estou aqui para ajudar você com informações sobre o tempo!',
+      '🌤️ Eu sou o Previzapp, seu assistente meteorológico pessoal e estou aqui para ajudar você com informações sobre o tempo!',
       '',
       '🔍 *Como funciono:*',
       'É muito simples! Basta digitar o nome de qualquer cidade e eu te darei todas as informações meteorológicas atualizadas.',
@@ -222,7 +225,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       '',
       '🤖 *Comandos úteis:*',
       '• `ajuda` ou `/help` - Ver guia completo',
-      '• `cancelar` ou `/cancel` - Cancelar operação',
       '• `/start` - Mostrar mensagem de boas-vindas',
       '',
       '🌟 *Pronto para começar?*',
@@ -257,7 +259,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
   private async sendWelcomeMessage(phoneNumber: string) {
     const welcomeMessage = [
-      '🌤️ *Bem-vindo ao seu assistente meteorológico!*',
+      '🌤️ *Bem-vindo ao Previzapp, seu assistente meteorológico!*',
       '',
       'Envie o nome de uma cidade e eu te darei informações detalhadas sobre o tempo atual.',
       '',
@@ -275,7 +277,7 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
   private async sendHelpMessage(phoneNumber: string) {
     const helpMessage = [
-      '📖 *Guia de Uso do Bot Meteorológico*',
+      '📖 *Guia de Uso do Bot Previzapp*',
       '',
       '🌍 *Como usar:*',
       '1️⃣ Digite o nome de uma cidade',
@@ -285,7 +287,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       '🤖 *Comandos disponíveis:*',
       '• `/start` - Iniciar conversa',
       '• `/help` ou `ajuda` - Mostrar esta ajuda',
-      '• `/cancel` ou `cancelar` - Cancelar operação',
       '',
       '📍 *Exemplos de consulta:*',
       '• São Paulo',
@@ -330,9 +331,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         'pt',
       );
 
-      // Debug dos alertas meteorológicos (comentado após identificar a estrutura)
-      // this.debugWeatherAlerts(weatherData);
-
       const formattedMessage = this.formatWeatherResponse(weatherData);
       await this.sendMessage(phoneNumber, formattedMessage);
 
@@ -351,7 +349,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
       let errorMessage =
         '❌ Não foi possível obter informações meteorológicas no momento. Tente novamente em alguns instantes.';
-
       if (
         error.message?.includes('not found') ||
         error.message?.includes('404')
@@ -416,11 +413,15 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     const windClass = classifications.windSpeed || 'N/A';
     const uvClass = classifications.uvIndex || 'N/A';
 
+    const processedSummary = weatherData.summary
+      ? this.convertKelvinToCelsiusInText(weatherData.summary)
+      : '';
+
     let message = `🌤️ *Previsão do Tempo para ${location}*\n`;
     message += `📅 ${dateTime.date} | ⏰ ${dateTime.time}\n\n`;
 
-    if (weatherData.summary) {
-      message += `📋 *Resumo:*\n${weatherData.summary}\n\n`;
+    if (processedSummary) {
+      message += `📋 *Resumo:*\n${processedSummary}\n\n`;
     }
 
     message += `🌡️ *Condições Atuais:*\n`;
@@ -441,7 +442,8 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     if (weatherData.recommendations?.length > 0) {
       message += `💡 *Minhas Recomendações:*\n`;
       weatherData.recommendations.slice(0, 3).forEach((rec) => {
-        message += `→ ${rec}\n`;
+        const processedRec = this.convertKelvinToCelsiusInText(rec);
+        message += `→ ${processedRec}\n`;
       });
       message += '\n';
     }
@@ -449,7 +451,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
       message += `⚠️ *Alertas Meteorológicos:*\n`;
       weatherData.alerts.items.forEach((alert, index) => {
-        // Usa a propriedade 'type' que é a correta para esta estrutura
         const alertTitle =
           alert.type || alert.event || alert.title || 'Alerta Meteorológico';
         const alertDescription =
@@ -457,7 +458,9 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         const alertSource = alert.source || '';
         const alertSeverity = alert.severity || '';
 
-        // Formatação do período se disponível
+        const processedDescription =
+          this.convertKelvinToCelsiusInText(alertDescription);
+
         let periodInfo = '';
         if (alert.period && alert.period.start && alert.period.end) {
           const startDate = new Date(alert.period.start).toLocaleString(
@@ -471,7 +474,6 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
           }
         }
 
-        // Formatação das categorias se disponível
         let categoriesInfo = '';
         if (alert.categories && alert.categories.length > 0) {
           categoriesInfo = `\n🏷️ *Categoria:* ${alert.categories.join(', ')}`;
@@ -484,11 +486,10 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         if (alertSource) {
           message += `🏢 *Fonte:* ${alertSource}\n`;
         }
-        message += `📝 ${alertDescription}`;
+        message += `📝 ${processedDescription}`;
         message += periodInfo;
         message += categoriesInfo;
 
-        // Adiciona quebra de linha entre alertas, exceto no último
         if (index < weatherData.alerts.items.length - 1) {
           message += '\n\n';
         } else {
@@ -531,18 +532,15 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  // Método para limpar cache de usuários (opcional, para gerenciamento de memória)
   public clearUserInteractionCache(): void {
     this.userInteractions.clear();
     this.logger.log('User interaction cache cleared');
   }
 
-  // Método para verificar se usuário já interagiu (útil para debugging)
   public hasUserInteracted(phoneNumber: string): boolean {
     return this.userInteractions.has(phoneNumber);
   }
 
-  // Método para debug dos alertas meteorológicos
   private debugWeatherAlerts(weatherData: any): void {
     if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
       this.logger.log('=== DEBUG: Alertas Meteorológicos ===');

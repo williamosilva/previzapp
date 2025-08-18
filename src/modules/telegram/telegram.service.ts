@@ -1,15 +1,40 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectBot } from 'nestjs-telegraf';
 //@ts-ignore
 import { Telegraf } from 'telegraf';
 
 @Injectable()
-export class TelegramService {
+export class TelegramService implements OnModuleInit {
   private readonly logger = new Logger(TelegramService.name);
+  private isEnabled = false;
 
-  constructor(@InjectBot() private bot: Telegraf) {}
+  constructor(
+    @InjectBot() private bot: Telegraf,
+    private readonly configService: ConfigService,
+  ) {
+    this.isEnabled =
+      this.configService.get<string>('ENABLE_TELEGRAM') === 'true';
+  }
+
+  async onModuleInit() {
+    if (!this.isEnabled) {
+      this.logger.log('Telegram module is disabled by configuration');
+      return;
+    }
+    this.logger.log('Telegram module is enabled and ready');
+  }
+
+  public isTelegramEnabled(): boolean {
+    return this.isEnabled;
+  }
 
   async sendMessage(chatId: number, message: string) {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled, cannot send message');
+      return;
+    }
+
     try {
       return await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
@@ -25,6 +50,13 @@ export class TelegramService {
     message: string,
     keyboard: any,
   ) {
+    if (!this.isEnabled) {
+      this.logger.warn(
+        'Telegram is disabled, cannot send message with keyboard',
+      );
+      return;
+    }
+
     try {
       return await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
@@ -44,6 +76,11 @@ export class TelegramService {
     newText: string,
     keyboard?: any,
   ) {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled, cannot edit message');
+      return;
+    }
+
     try {
       return await this.bot.telegram.editMessageText(
         chatId,
@@ -62,6 +99,11 @@ export class TelegramService {
   }
 
   async sendTypingAction(chatId: number) {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled, cannot send typing action');
+      return;
+    }
+
     try {
       return await this.bot.telegram.sendChatAction(chatId, 'typing');
     } catch (error) {
@@ -70,6 +112,13 @@ export class TelegramService {
   }
 
   async sendMessageWithMarkdown(chatId: number, message: string) {
+    if (!this.isEnabled) {
+      this.logger.warn(
+        'Telegram is disabled, cannot send message with markdown',
+      );
+      return;
+    }
+
     try {
       return await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'MarkdownV2',
@@ -116,6 +165,11 @@ export class TelegramService {
     text?: string,
     showAlert?: boolean,
   ) {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled, cannot answer callback query');
+      return;
+    }
+
     try {
       return await this.bot.telegram.answerCbQuery(
         callbackQueryId,
@@ -129,6 +183,11 @@ export class TelegramService {
   }
 
   async deleteMessage(chatId: number, messageId: number) {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled, cannot delete message');
+      return;
+    }
+
     try {
       return await this.bot.telegram.deleteMessage(chatId, messageId);
     } catch (error) {
