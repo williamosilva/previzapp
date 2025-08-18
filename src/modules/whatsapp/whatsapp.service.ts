@@ -15,15 +15,44 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WhatsAppService.name);
   private client: Client;
   private userSessions = new Map<string, UserSession>();
+  private userInteractions = new Map<string, boolean>(); // Track first interaction
   private isReady = false;
   private isEnabled = false;
+
+  // Palavras de saudação comuns
+  private greetingWords = [
+    'oi',
+    'olá',
+    'ola',
+    'hey',
+    'hi',
+    'hello',
+    'bom dia',
+    'boa tarde',
+    'boa noite',
+    'salve',
+    'eai',
+    'e ai',
+    'tudo bem',
+    'como vai',
+    'opa',
+    'eae',
+    'fala',
+    'buenos dias',
+    'buenas tardes',
+    'buenas noches',
+    'hola',
+    'good morning',
+    'good afternoon',
+    'good evening',
+  ];
 
   constructor(
     private readonly weatherMessageService: WeatherMessageService,
     private readonly configService: ConfigService,
   ) {
-
-    this.isEnabled = this.configService.get<string>('ENABLE_WHATSAPP') === 'true';
+    this.isEnabled =
+      this.configService.get<string>('ENABLE_WHATSAPP') === 'true';
   }
 
   async onModuleInit() {
@@ -31,11 +60,14 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       this.logger.log('WhatsApp module is disabled by configuration');
       return;
     }
-    
+
     try {
       await this.initializeClient();
     } catch (error) {
-      this.logger.error('WhatsApp initialization failed, continuing without WhatsApp support:', error);
+      this.logger.error(
+        'WhatsApp initialization failed, continuing without WhatsApp support:',
+        error,
+      );
     }
   }
 
@@ -102,20 +134,21 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  // Resto dos métodos permanecem iguais, mas adicione verificações onde necessário
   private async handleMessage(message: any) {
     if (!this.isEnabled || !this.isReady) return;
-    
+
     const phoneNumber = message.from;
     const messageBody = message.body.trim();
 
     this.logger.log(`Message received from ${phoneNumber}: ${messageBody}`);
 
+    // Comandos específicos têm prioridade
     if (
       messageBody.toLowerCase().startsWith('/start') ||
       messageBody.toLowerCase() === 'start'
     ) {
       await this.sendWelcomeMessage(phoneNumber);
+      this.markUserAsInteracted(phoneNumber);
       return;
     }
 
@@ -135,7 +168,68 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
+    // Verificar se é a primeira interação e se é uma saudação
+    if (this.isFirstInteraction(phoneNumber) && this.isGreeting(messageBody)) {
+      await this.sendGreetingResponse(phoneNumber);
+      this.markUserAsInteracted(phoneNumber);
+      return;
+    }
+
+    // Marcar que o usuário já interagiu e processar como consulta meteorológica
+    this.markUserAsInteracted(phoneNumber);
     await this.handleLocationRequest(phoneNumber, messageBody);
+  }
+
+  private isFirstInteraction(phoneNumber: string): boolean {
+    return !this.userInteractions.has(phoneNumber);
+  }
+
+  private markUserAsInteracted(phoneNumber: string): void {
+    this.userInteractions.set(phoneNumber, true);
+  }
+
+  private isGreeting(message: string): boolean {
+    const normalizedMessage = message
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove pontuação
+      .trim();
+
+    // Verifica se a mensagem contém apenas saudações (máximo 4 palavras)
+    const words = normalizedMessage.split(/\s+/);
+    if (words.length > 4) return false;
+
+    // Verifica se pelo menos uma palavra é uma saudação
+    return this.greetingWords.some((greeting) => {
+      return words.some((word) => word === greeting || word.includes(greeting));
+    });
+  }
+
+  private async sendGreetingResponse(phoneNumber: string) {
+    const greetingMessage = [
+      '👋 *Olá! Que bom te conhecer!*',
+      '',
+      '🌤️ Eu sou seu assistente meteorológico pessoal e estou aqui para ajudar você com informações sobre o tempo!',
+      '',
+      '🔍 *Como funciono:*',
+      'É muito simples! Basta digitar o nome de qualquer cidade e eu te darei todas as informações meteorológicas atualizadas.',
+      '',
+      '📋 *Exemplos do que você pode digitar:*',
+      '• São Paulo',
+      '• Rio de Janeiro, RJ',
+      '• Campinas, SP',
+      '• London, UK',
+      '• Tokyo, Japan',
+      '',
+      '🤖 *Comandos úteis:*',
+      '• `ajuda` ou `/help` - Ver guia completo',
+      '• `cancelar` ou `/cancel` - Cancelar operação',
+      '• `/start` - Mostrar mensagem de boas-vindas',
+      '',
+      '🌟 *Pronto para começar?*',
+      'Digite o nome de uma cidade e vamos descobrir como está o tempo lá! 🌈',
+    ].join('\n');
+
+    await this.sendMessage(phoneNumber, greetingMessage);
   }
 
   private async sendMessage(phoneNumber: string, message: string) {
@@ -161,10 +255,9 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     return this.isEnabled;
   }
 
-  // ... resto dos métodos privados permanecem iguais
   private async sendWelcomeMessage(phoneNumber: string) {
     const welcomeMessage = [
-      '🌤️ *Olá! Eu sou seu assistente meteorológico!*',
+      '🌤️ *Bem-vindo ao seu assistente meteorológico!*',
       '',
       'Envie o nome de uma cidade e eu te darei informações detalhadas sobre o tempo atual.',
       '',
@@ -236,6 +329,9 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
         location,
         'pt',
       );
+
+      // Debug dos alertas meteorológicos (comentado após identificar a estrutura)
+      // this.debugWeatherAlerts(weatherData);
 
       const formattedMessage = this.formatWeatherResponse(weatherData);
       await this.sendMessage(phoneNumber, formattedMessage);
@@ -352,10 +448,54 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
 
     if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
       message += `⚠️ *Alertas Meteorológicos:*\n`;
-      weatherData.alerts.items.slice(0, 2).forEach((alert) => {
-        message += `‼️ *${alert.event}*\n`;
-        message += `${alert.description.slice(0, 120)}...\n\n`;
+      weatherData.alerts.items.forEach((alert, index) => {
+        // Usa a propriedade 'type' que é a correta para esta estrutura
+        const alertTitle =
+          alert.type || alert.event || alert.title || 'Alerta Meteorológico';
+        const alertDescription =
+          alert.description || 'Descrição não disponível';
+        const alertSource = alert.source || '';
+        const alertSeverity = alert.severity || '';
+
+        // Formatação do período se disponível
+        let periodInfo = '';
+        if (alert.period && alert.period.start && alert.period.end) {
+          const startDate = new Date(alert.period.start).toLocaleString(
+            'pt-BR',
+          );
+          const endDate = new Date(alert.period.end).toLocaleString('pt-BR');
+          periodInfo = `\n📅 *Período:* ${startDate} até ${endDate}`;
+
+          if (alert.period.durationHours) {
+            periodInfo += ` (${alert.period.durationHours}h)`;
+          }
+        }
+
+        // Formatação das categorias se disponível
+        let categoriesInfo = '';
+        if (alert.categories && alert.categories.length > 0) {
+          categoriesInfo = `\n🏷️ *Categoria:* ${alert.categories.join(', ')}`;
+        }
+
+        message += `‼️ *${alertTitle}*\n`;
+        if (alertSeverity) {
+          message += `🔴 *Severidade:* ${alertSeverity}\n`;
+        }
+        if (alertSource) {
+          message += `🏢 *Fonte:* ${alertSource}\n`;
+        }
+        message += `📝 ${alertDescription}`;
+        message += periodInfo;
+        message += categoriesInfo;
+
+        // Adiciona quebra de linha entre alertas, exceto no último
+        if (index < weatherData.alerts.items.length - 1) {
+          message += '\n\n';
+        } else {
+          message += '\n';
+        }
       });
+      message += '\n';
     }
 
     message += `⏰ Atualizado às ${dateTime.time}`;
@@ -388,6 +528,32 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     } catch (error) {
       this.logger.error('Error getting client information:', error);
       return null;
+    }
+  }
+
+  // Método para limpar cache de usuários (opcional, para gerenciamento de memória)
+  public clearUserInteractionCache(): void {
+    this.userInteractions.clear();
+    this.logger.log('User interaction cache cleared');
+  }
+
+  // Método para verificar se usuário já interagiu (útil para debugging)
+  public hasUserInteracted(phoneNumber: string): boolean {
+    return this.userInteractions.has(phoneNumber);
+  }
+
+  // Método para debug dos alertas meteorológicos
+  private debugWeatherAlerts(weatherData: any): void {
+    if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
+      this.logger.log('=== DEBUG: Alertas Meteorológicos ===');
+      this.logger.log(`Total de alertas: ${weatherData.alerts.items.length}`);
+
+      weatherData.alerts.items.forEach((alert, index) => {
+        this.logger.log(`--- Alerta ${index + 1} ---`);
+        this.logger.log('Propriedades disponíveis:', Object.keys(alert));
+        this.logger.log('Objeto completo:', JSON.stringify(alert, null, 2));
+      });
+      this.logger.log('=== FIM DEBUG ===');
     }
   }
 }
