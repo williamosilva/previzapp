@@ -1,4 +1,7 @@
-# Previzapp - Assistente Climático Inteligente
+<div align="center">
+  <img src="https://i.imgur.com/TtQgcce.png" alt="Previzapp Logo" width="72" height="72" />
+  <h1>Previzapp - Assistente Climático Inteligente</h1>
+</div>
 
 ## 🌤️ Visão Geral
 
