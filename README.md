@@ -682,13 +682,15 @@ npm run start:prod
 #### 1. Usando Docker Compose (Recomendado)
 
 ```bash
-docker-compose up
+docker compose --profile dev up
+ou
+docker compose --profile prod up
 ```
 
 #### 2. Executar em background
 
 ```bash
-docker-compose up -d
+docker-compose --profile dev up -d
 ```
 
 #### 3. Parar os serviços
