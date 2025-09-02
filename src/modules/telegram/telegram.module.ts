@@ -12,9 +12,9 @@ export class TelegramModule {
     const isEnabled = process.env.ENABLE_TELEGRAM === 'true';
 
     if (!isEnabled) {
-      console.log(
-        '[TelegramModule] Telegram disabled - loading minimal module',
-      );
+      // console.log(
+      //   '[TelegramModule] Telegram disabled - loading minimal module',
+      // );
       return {
         module: TelegramModule,
         imports: [WeatherMessagesModule],
