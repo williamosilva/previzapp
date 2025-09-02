@@ -1,7 +1,8 @@
 import { Update, Ctx, Start, On, Command } from 'nestjs-telegraf';
 //@ts-ignore
 import { Context } from 'telegraf';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { TelegramService } from './telegram.service';
 import { WeatherMessageService } from '../weather-messages/weather-messages.service';
@@ -10,9 +11,10 @@ import { UserSession } from './types';
 
 @Update()
 @Injectable()
-export class TelegramUpdate {
+export class TelegramUpdate implements OnModuleInit {
   private readonly logger = new Logger(TelegramUpdate.name);
   private userSessions = new Map<number, UserSession>();
+  private isEnabled = false;
 
   private readonly languages = {
     '🇧🇷 Português': 'pt',
@@ -29,100 +31,166 @@ export class TelegramUpdate {
   constructor(
     private readonly weatherMessageService: WeatherMessageService,
     private readonly telegramService: TelegramService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.isEnabled =
+      this.configService.get<string>('ENABLE_TELEGRAM') === 'true';
+  }
+
+  async onModuleInit() {
+    if (!this.isEnabled) {
+      this.logger.log('TelegramUpdate handlers are disabled by configuration');
+      return;
+    }
+    this.logger.log('TelegramUpdate handlers are enabled and ready');
+  }
+
+  private async executeIfEnabled(handler: () => Promise<void>): Promise<void> {
+    if (!this.isEnabled) {
+      this.logger.warn('Telegram is disabled - ignoring update');
+      return;
+    }
+    await handler();
+  }
 
   @Start()
   async start(@Ctx() ctx: Context) {
-    if (!ctx.chat) {
-      this.logger.error('No chat context available');
-      return;
-    }
+    await this.executeIfEnabled(async () => {
+      if (!ctx.chat) {
+        this.logger.error('No chat context available');
+        return;
+      }
 
-    const chatId = ctx.chat.id;
+      const chatId = ctx.chat.id;
+      this.userSessions.delete(chatId);
 
-    this.userSessions.delete(chatId);
+      const welcomeMessage = [
+        I18nService.t('WELCOME_TITLE', 'en'),
+        I18nService.t('WELCOME_MESSAGE', 'en'),
+        I18nService.t('WELCOME_EXAMPLES', 'en'),
+        I18nService.t('WELCOME_HELP_TIP', 'en'),
+      ].join('\n\n');
 
-    const welcomeMessage = [
-      I18nService.t('WELCOME_TITLE', 'en'),
-      I18nService.t('WELCOME_MESSAGE', 'en'),
-      I18nService.t('WELCOME_EXAMPLES', 'en'),
-      I18nService.t('WELCOME_HELP_TIP', 'en'),
-    ].join('\n\n');
-
-    await ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
+      await ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
+    });
   }
 
   @Command('help')
   async help(@Ctx() ctx: Context) {
-    const helpMessage = [
-      I18nService.t('HELP_TITLE', 'en'),
-      '',
-      I18nService.t('HELP_STEP1', 'en'),
-      I18nService.t('HELP_STEP2', 'en'),
-      I18nService.t('HELP_STEP3', 'en'),
-      '',
-      I18nService.t('HELP_AVAILABLE_COMMANDS', 'en'),
-      I18nService.t('HELP_START_COMMAND', 'en'),
-      I18nService.t('HELP_HELP_COMMAND', 'en'),
-      I18nService.t('HELP_CANCEL_COMMAND', 'en'),
-      '',
-      I18nService.t('HELP_USAGE_EXAMPLES', 'en'),
-      '',
-      I18nService.t('HELP_SUPPORTED_LANGUAGES', 'en'),
-    ].join('\n');
+    await this.executeIfEnabled(async () => {
+      const helpMessage = [
+        I18nService.t('HELP_TITLE', 'en'),
+        '',
+        I18nService.t('HELP_STEP1', 'en'),
+        I18nService.t('HELP_STEP2', 'en'),
+        I18nService.t('HELP_STEP3', 'en'),
+        '',
+        I18nService.t('HELP_AVAILABLE_COMMANDS', 'en'),
+        I18nService.t('HELP_START_COMMAND', 'en'),
+        I18nService.t('HELP_HELP_COMMAND', 'en'),
+        I18nService.t('HELP_CANCEL_COMMAND', 'en'),
+        '',
+        I18nService.t('HELP_USAGE_EXAMPLES', 'en'),
+        '',
+        I18nService.t('HELP_SUPPORTED_LANGUAGES', 'en'),
+      ].join('\n');
 
-    await ctx.reply(helpMessage, { parse_mode: 'Markdown' });
+      await ctx.reply(helpMessage, { parse_mode: 'Markdown' });
+    });
   }
 
   @Command('cancel')
   async cancel(@Ctx() ctx: Context) {
-    if (!ctx.chat) {
-      this.logger.error('No chat context available');
-      return;
-    }
+    await this.executeIfEnabled(async () => {
+      if (!ctx.chat) {
+        this.logger.error('No chat context available');
+        return;
+      }
 
-    const chatId = ctx.chat.id;
-
-    this.userSessions.delete(chatId);
-    await ctx.reply(I18nService.t('ERROR_OPERATION_CANCELLED', 'en'));
+      const chatId = ctx.chat.id;
+      this.userSessions.delete(chatId);
+      await ctx.reply(I18nService.t('ERROR_OPERATION_CANCELLED', 'en'));
+    });
   }
 
   @On('text')
   async handleMessage(@Ctx() ctx: Context) {
-    if (!ctx.message) {
-      this.logger.error('No message context available');
-      return;
-    }
+    await this.executeIfEnabled(async () => {
+      if (!ctx.message) {
+        this.logger.error('No message context available');
+        return;
+      }
 
-    const message = ctx.message;
+      const message = ctx.message;
 
-    if (!('text' in message)) {
-      await ctx.reply(I18nService.t('ERROR_TEXT_ONLY', 'en'));
-      return;
-    }
+      if (!('text' in message)) {
+        await ctx.reply(I18nService.t('ERROR_TEXT_ONLY', 'en'));
+        return;
+      }
 
-    if (!ctx.chat) {
-      this.logger.error('No chat context available');
-      return;
-    }
+      if (!ctx.chat) {
+        this.logger.error('No chat context available');
+        return;
+      }
 
-    const userText = message.text.trim();
-    const chatId = ctx.chat.id;
+      const userText = message.text.trim();
+      const chatId = ctx.chat.id;
 
-    if (userText.startsWith('/')) {
-      return;
-    }
+      if (userText.startsWith('/')) {
+        return;
+      }
 
-    let session = this.userSessions.get(chatId);
+      let session = this.userSessions.get(chatId);
 
-    if (session?.waitingForLanguage) {
-      await this.handleLanguageSelection(ctx, userText, chatId);
-      return;
-    }
+      if (session?.waitingForLanguage) {
+        await this.handleLanguageSelection(ctx, userText, chatId);
+        return;
+      }
 
-    await this.handleLocationRequest(ctx, userText, chatId);
+      await this.handleLocationRequest(ctx, userText, chatId);
+    });
   }
 
+  @On('callback_query')
+  async handleCallbackQuery(@Ctx() ctx: any) {
+    await this.executeIfEnabled(async () => {
+      if (
+        !ctx.callbackQuery ||
+        !ctx.callbackQuery.data ||
+        !ctx.callbackQuery.message?.chat?.id
+      ) {
+        this.logger.error('Invalid callback query context');
+        return;
+      }
+
+      const callbackData = ctx.callbackQuery.data;
+      const chatId = ctx.callbackQuery.message.chat.id;
+
+      if (callbackData.startsWith('lang_')) {
+        const languageCode = callbackData.replace('lang_', '');
+        const session = this.userSessions.get(chatId);
+
+        if (!session || !session.location) {
+          await ctx.answerCbQuery(I18nService.t('ERROR_SESSION_EXPIRED', 'en'));
+          return;
+        }
+
+        const languageName = I18nService.getLanguageDisplayName(languageCode);
+
+        await ctx.answerCbQuery(
+          I18nService.t('LANGUAGE_SELECTED', languageCode, {
+            language: languageName,
+          }),
+        );
+        session.selectedLanguage = languageCode;
+        session.waitingForLanguage = false;
+
+        await this.fetchAndSendWeatherData(ctx, session);
+      }
+    });
+  }
+
+  // Resto dos métodos privados permanecem iguais...
   private async handleLocationRequest(
     ctx: Context,
     location: string,
@@ -214,43 +282,6 @@ export class TelegramUpdate {
     await this.fetchAndSendWeatherData(ctx, session);
   }
 
-  @On('callback_query')
-  async handleCallbackQuery(@Ctx() ctx: any) {
-    if (
-      !ctx.callbackQuery ||
-      !ctx.callbackQuery.data ||
-      !ctx.callbackQuery.message?.chat?.id
-    ) {
-      this.logger.error('Invalid callback query context');
-      return;
-    }
-
-    const callbackData = ctx.callbackQuery.data;
-    const chatId = ctx.callbackQuery.message.chat.id;
-
-    if (callbackData.startsWith('lang_')) {
-      const languageCode = callbackData.replace('lang_', '');
-      const session = this.userSessions.get(chatId);
-
-      if (!session || !session.location) {
-        await ctx.answerCbQuery(I18nService.t('ERROR_SESSION_EXPIRED', 'en'));
-        return;
-      }
-
-      const languageName = I18nService.getLanguageDisplayName(languageCode);
-
-      await ctx.answerCbQuery(
-        I18nService.t('LANGUAGE_SELECTED', languageCode, {
-          language: languageName,
-        }),
-      );
-      session.selectedLanguage = languageCode;
-      session.waitingForLanguage = false;
-
-      await this.fetchAndSendWeatherData(ctx, session);
-    }
-  }
-
   private async fetchAndSendWeatherData(ctx: Context, session: UserSession) {
     const { location, selectedLanguage, chatId } = session;
 
@@ -258,10 +289,6 @@ export class TelegramUpdate {
       await this.telegramService.sendTypingAction(chatId);
 
       this.userSessions.delete(chatId);
-
-      // this.logger.log(
-      //   `Searching weather for ${location} in language ${selectedLanguage}`,
-      // );
 
       const weatherData = await this.weatherMessageService.getWeatherSummary(
         location!,
