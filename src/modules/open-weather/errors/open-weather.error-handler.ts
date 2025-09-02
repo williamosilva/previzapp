@@ -10,7 +10,6 @@ export class OpenWeatherErrorHandler {
   handleError(error: AxiosError): Observable<never> {
     let openWeatherError: OpenWeatherError;
 
-    // Log detalhado para debugging
     this.logger.error(
       `Error in request to OpenWeather: ${error.message}`,
       error.stack,

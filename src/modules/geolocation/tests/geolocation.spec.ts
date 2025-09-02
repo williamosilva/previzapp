@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GeolocationService } from '../geolocation.service';
 
+process.env.GOOGLE_GEOCODING_API_KEY = 'fake-api-key-for-testing';
+
 const geocoderMock = {
   geocode: jest.fn(),
 };
@@ -44,6 +46,9 @@ describe('GeolocationService', () => {
         latitude: -23.55052,
         longitude: -46.63331,
         address: 'Rua da Consolação',
+        cached: false,
+        fullAddress: 'Rua da Consolação, Consolação, São Paulo, SP, Brasil',
+        source: 'google',
       });
 
       expect(geocoderMock.geocode).toHaveBeenCalledWith(
@@ -58,7 +63,7 @@ describe('GeolocationService', () => {
         geolocationService.getCoordinatesFromAddress(
           'Address that does not exist',
         ),
-      ).rejects.toThrow('Location not found');
+      ).rejects.toThrow('Localização não encontrada');
 
       try {
         await geolocationService.getCoordinatesFromAddress(
@@ -78,7 +83,7 @@ describe('GeolocationService', () => {
         geolocationService.getCoordinatesFromAddress(
           'Rua da Consolação, São Paulo',
         ),
-      ).rejects.toThrow(`Error fetching coordinates: ${errorMessage}`);
+      ).rejects.toThrow(`Erro no serviço de geocodificação: ${errorMessage}`);
 
       try {
         await geolocationService.getCoordinatesFromAddress(
@@ -86,7 +91,7 @@ describe('GeolocationService', () => {
         );
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
-        expect(error.getStatus()).toBe(HttpStatus.BAD_REQUEST);
+        expect(error.getStatus()).toBe(HttpStatus.SERVICE_UNAVAILABLE); // Note: Service throws 503, not 400
       }
     });
 

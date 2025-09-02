@@ -22,7 +22,6 @@ describe('WeatherProcessorService', () => {
   let service: WeatherProcessorService;
   let formatterService: WeatherFormatterService;
 
-  // Mock dos dados de entrada
   const mockOverviewData: ProcessedWeatherOverview = {
     location: {
       latitude: -23.5505,
@@ -76,7 +75,6 @@ describe('WeatherProcessorService', () => {
     ],
   };
 
-  // Mocks para os métodos do WeatherFormatterService
   const formatterServiceMock = {
     formatDateTime: jest.fn().mockReturnValue({
       formattedDate: '10/10/2023',
@@ -206,11 +204,15 @@ describe('WeatherProcessorService', () => {
         summary: 'Cloudy weather with a chance of rain',
       });
 
-      // Verificar chamadas para os métodos do formatador
-      expect(formatterService.formatDateTime).toHaveBeenCalledWith(1696939200);
+      expect(formatterService.formatDateTime).toHaveBeenCalledWith(
+        1696939200,
+        'America/Sao_Paulo',
+      );
+
       expect(formatterService.formatSunTimes).toHaveBeenCalledWith(
         1696928400,
         1696971600,
+        'America/Sao_Paulo',
       );
       expect(formatterService.processTemperature).toHaveBeenCalledWith(
         295.15,
@@ -247,7 +249,10 @@ describe('WeatherProcessorService', () => {
 
   describe('processCurrentData', () => {
     it('should correctly process current weather data', () => {
-      const result = service['processCurrentData'](mockOneCallData);
+      const result = service['processCurrentData'](
+        mockOneCallData,
+        'America/Sao_Paulo',
+      );
 
       expect(result).toEqual({
         dateTime: {

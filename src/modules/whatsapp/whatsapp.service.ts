@@ -540,18 +540,4 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
   public hasUserInteracted(phoneNumber: string): boolean {
     return this.userInteractions.has(phoneNumber);
   }
-
-  private debugWeatherAlerts(weatherData: any): void {
-    if (weatherData.alerts?.hasAlerts && weatherData.alerts.items.length > 0) {
-      this.logger.log('=== DEBUG: Alertas Meteorológicos ===');
-      this.logger.log(`Total de alertas: ${weatherData.alerts.items.length}`);
-
-      weatherData.alerts.items.forEach((alert, index) => {
-        this.logger.log(`--- Alerta ${index + 1} ---`);
-        this.logger.log('Propriedades disponíveis:', Object.keys(alert));
-        this.logger.log('Objeto completo:', JSON.stringify(alert, null, 2));
-      });
-      this.logger.log('=== FIM DEBUG ===');
-    }
-  }
 }

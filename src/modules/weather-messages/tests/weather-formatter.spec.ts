@@ -5,32 +5,6 @@ describe('WeatherFormatterService', () => {
 
   beforeEach(() => {
     service = new WeatherFormatterService();
-
-    // Ajustando o mock para retornar os valores esperados nos testes
-    jest
-      .spyOn(Date.prototype, 'toLocaleTimeString')
-      .mockImplementation(function (locale, options) {
-        if (this.getTime() === 1615881600000) {
-          // sunrise/start time
-          return '10:00';
-        } else if (this.getTime() === 1615925400000) {
-          // sunset/end time
-          return '22:30';
-        }
-        return '00:00';
-      });
-
-    // Mock toISOString para garantir a data correta
-    jest.spyOn(Date.prototype, 'toISOString').mockImplementation(function () {
-      if (this.getTime() === 1615881600000) {
-        // sunrise/start time
-        return '2021-03-16T10:00:00.000Z';
-      } else if (this.getTime() === 1615925400000) {
-        // sunset/end time
-        return '2021-03-16T22:30:00.000Z';
-      }
-      return '2021-03-16T00:00:00.000Z';
-    });
   });
 
   afterEach(() => {
@@ -40,6 +14,28 @@ describe('WeatherFormatterService', () => {
   describe('formatDateTime', () => {
     it('must format timestamp into date and time correctly', () => {
       const timestamp = 1615881600; // 16 de março de 2021, 10:00:00 UTC
+
+      jest
+        .spyOn(Date.prototype, 'toLocaleDateString')
+        .mockImplementation(
+          (
+            locale?: string | string[],
+            options?: Intl.DateTimeFormatOptions,
+          ) => {
+            return '2021-03-16';
+          },
+        );
+
+      jest
+        .spyOn(Date.prototype, 'toLocaleTimeString')
+        .mockImplementation(
+          (
+            locale?: string | string[],
+            options?: Intl.DateTimeFormatOptions,
+          ) => {
+            return '10:00';
+          },
+        );
 
       const result = service.formatDateTime(timestamp);
 
@@ -55,6 +51,21 @@ describe('WeatherFormatterService', () => {
       const sunrise = 1615881600; // 16 de março de 2021, 10:00:00 UTC
       const sunset = 1615925400; // 16 de março de 2021, 22:30:00 UTC
 
+      jest
+        .spyOn(Date.prototype, 'toLocaleTimeString')
+        .mockImplementation(function (
+          this: Date,
+          locale?: string | string[],
+          options?: Intl.DateTimeFormatOptions,
+        ) {
+          if (this.getTime() === 1615881600000) {
+            return '10:00';
+          } else if (this.getTime() === 1615925400000) {
+            return '22:30';
+          }
+          return '00:00';
+        });
+
       const result = service.formatSunTimes(sunrise, sunset);
 
       expect(result).toEqual({
@@ -69,11 +80,30 @@ describe('WeatherFormatterService', () => {
       const start = 1615881600; // 16 de março de 2021, 10:00:00 UTC
       const end = 1615925400; // 16 de março de 2021, 22:30:00 UTC
 
+      const timezoneOffset = -3 * 60 * 60 * 1000; // UTC-3 offset used by the service
+      const adjustedStart = start * 1000 + timezoneOffset;
+      const adjustedEnd = end * 1000 + timezoneOffset;
+
+      jest
+        .spyOn(Date.prototype, 'toLocaleTimeString')
+        .mockImplementation(function (
+          this: Date,
+          locale?: string | string[],
+          options?: Intl.DateTimeFormatOptions,
+        ) {
+          if (this.getTime() === adjustedStart) {
+            return '07:00'; // 10:00 UTC - 3 hours = 07:00
+          } else if (this.getTime() === adjustedEnd) {
+            return '19:30'; // 22:30 UTC - 3 hours = 19:30
+          }
+          return '00:00';
+        });
+
       const result = service.formatAlertTimes(start, end);
 
       expect(result).toEqual({
-        formattedStartTime: '2021-03-16 10:00',
-        formattedEndTime: '2021-03-16 22:30',
+        formattedStartTime: '2021-03-16 07:00', // Adjusted for UTC-3
+        formattedEndTime: '2021-03-16 19:30', // Adjusted for UTC-3
       });
     });
   });

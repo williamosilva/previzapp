@@ -5,7 +5,7 @@ export class GeolocationService {
   private readonly logger = new Logger(GeolocationService.name);
   private geocoder;
   private lastRequestTime = 0;
-  private readonly MIN_REQUEST_INTERVAL = 100; // Google permite mais requests
+  private readonly MIN_REQUEST_INTERVAL = 100;
 
   // Cache simples em memória com TTL
   private cache = new Map<string, { data: any; timestamp: number }>();
@@ -16,7 +16,7 @@ export class GeolocationService {
 
     this.logger.log('Inicializando geocoder com Google Geocoding API...');
 
-    // Verificar se a API key está configurada
+    // Verifica se a API key está configurada
     if (!process.env.GOOGLE_GEOCODING_API_KEY) {
       this.logger.error('❌ GOOGLE_GEOCODING_API_KEY não configurada!');
       throw new Error('Google Geocoding API Key é obrigatória');
@@ -27,14 +27,13 @@ export class GeolocationService {
       httpAdapter: 'https',
       apiKey: process.env.GOOGLE_GEOCODING_API_KEY,
       formatter: null,
-      // Google é mais tolerante, mas ainda assim vamos ser respeitosos
+
       timeout: 10000,
     });
 
     this.logger.log('✅ Google Geocoding API configurada com sucesso');
   }
 
-  // Rate limiting mais leve para Google
   private async enforceRateLimit() {
     const now = Date.now();
     const timeSinceLastRequest = now - this.lastRequestTime;
@@ -62,7 +61,6 @@ export class GeolocationService {
     }
   }
 
-  // Normalizar endereço para melhor cache
   private normalizeAddress(address: string): string {
     return address
       .toLowerCase()
@@ -165,10 +163,8 @@ export class GeolocationService {
     }
   }
 
-  // Health check específico para Google
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
-      // Teste com endereço conhecido
       await this.getCoordinatesFromAddress('São Paulo, SP, Brasil');
 
       return {
@@ -232,7 +228,7 @@ export class GeolocationService {
     for (const address of defaultAddresses) {
       try {
         await this.getCoordinatesFromAddress(address);
-        // Google permite requests mais rápidos
+
         await new Promise((resolve) => setTimeout(resolve, 200));
       } catch (error) {
         this.logger.warn(

@@ -21,6 +21,7 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - ENABLE_TELEGRAM=${ENABLE_TELEGRAM}
       - ENABLE_WHATSAPP=${ENABLE_WHATSAPP}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./src:/app/src:ro
       - whatsapp_sessions:/app/.wwebjs_auth
@@ -56,6 +57,7 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - ENABLE_WHATSAPP=${ENABLE_WHATSAPP}
       - ENABLE_TELEGRAM=${ENABLE_TELEGRAM}
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - whatsapp_sessions:/app/.wwebjs_auth
       - whatsapp_cache:/app/.wwebjs_cache

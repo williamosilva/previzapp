@@ -239,10 +239,12 @@ describe('WeatherMessages', () => {
         lon: mockGeolocationResponse.longitude,
       });
 
+      // In your weather-messages.spec.ts file, update the test expectation
       expect(weatherProcessor.processWeatherData).toHaveBeenCalledWith(
         mockWeatherOverviewResponse,
         mockOneCallResponse,
         mockGeolocationResponse.address,
+        'America/New_York', // Add this expected timezone parameter
       );
       expect(translationService.translateObject).toHaveBeenCalledWith(
         mockProcessedData,
