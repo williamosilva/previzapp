@@ -15,6 +15,27 @@ O **Previzapp** é um assistente climático inteligente que oferece informaçõe
   <img src="https://i.imgur.com/wMrnk9d.png" alt="WebService Previzapp" width="100%" />
 </div>
 
+##  Demonstração
+
+Experimente o **Previzapp** em funcionamento! Acesse nossa demonstração interativa para testar:
+
+<div align="center">
+  <a href="https://previzapp-front.vercel.app" target="_blank">
+    <img src="https://img.shields.io/badge/🌤️%20Ver%20Demonstração-Live%20Demo-blue?style=for-the-badge&logo=weather&logoColor=white" alt="Ver Demonstração" />
+  </a>
+</div>
+
+### O que você pode testar:
+
+- **🌍 API REST**: Endpoint interativo
+- **🗺️ Localização**: Teste com cidades, endereços e coordenadas
+- **🌐 Multilíngue**: Respostas em muitos idiomas diferentes
+
+Atualmente o modo teste para o bot de telegram e de whatsapp se encontra desativado...
+Teste localmente!
+
+---
+
 ## Principais Funcionalidades
 
 - **🤖 Assistente WhatsApp**: Bot conversacional que responde consultas meteorológicas via mensagens
