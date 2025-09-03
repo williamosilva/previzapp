@@ -11,6 +11,9 @@ O **Previzapp** é um assistente climático inteligente que oferece informaçõe
   <img src="https://i.imgur.com/XdpX3u8.png" alt="Previzapp WhatsApp Bot" width="49%" />
   <img src="https://i.imgur.com/GsdLH2f.png" alt="Previzapp Telegram Bot" width="49%" />
 </div>
+<div align="center">
+  <img src="https://i.imgur.com/wMrnk9d.png" alt="WebService Previzapp" width="100%" />
+</div>
 
 ## Principais Funcionalidades
 
